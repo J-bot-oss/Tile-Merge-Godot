@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://pwmpk870w8qv"]
+
+[ext_resource type="Script" uid="uid://8poffenn7agl" path="res://scripts/tile.gd" id="1_2sjy5"]
+
+[node name="Tile" type="Button" unique_id=1164313304]
+script = ExtResource("1_2sjy5")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1425575817]
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 80.0
+mouse_filter = 2
