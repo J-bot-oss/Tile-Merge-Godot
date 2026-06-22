@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://d1660w2ixoih7"]
+
+[ext_resource type="Script" uid="uid://bbqda1asu4d7v" path="res://ui/game_over.gd" id="1_oo8kp"]
+
+[node name="Game Over" type="Control" unique_id=748484954]
+custom_minimum_size = Vector2(600, 400)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_oo8kp")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=985521728]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.29411766)
+
+[node name="Label" type="Label" parent="." unique_id=1634034126]
+layout_mode = 0
+offset_left = 388.0
+offset_top = 259.0
+offset_right = 771.0
+offset_bottom = 347.0
+theme_override_font_sizes/font_size = 64
+text = "GAME OVER "
+
+[node name="Final Score" type="Label" parent="." unique_id=1629802259]
+layout_mode = 0
+offset_left = 504.0
+offset_top = 368.0
+offset_right = 699.0
+offset_bottom = 413.0
+theme_override_font_sizes/font_size = 32
+text = "Final Score:0"
+
+[node name="Play Again" type="Button" parent="." unique_id=908213285]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 0
+offset_left = 428.0
+offset_top = 444.0
+offset_right = 828.0
+offset_bottom = 475.0
+text = "PLAY AGAIN"
+
+[node name="Main Menu" type="Button" parent="." unique_id=1622197200]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 0
+offset_left = 432.0
+offset_top = 515.0
+offset_right = 832.0
+offset_bottom = 546.0
+text = "MAIN MENU"
+
+[connection signal="pressed" from="Play Again" to="." method="_on_play_again_pressed"]
+[connection signal="pressed" from="Main Menu" to="." method="_on_main_menu_pressed"]

@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://cs510eakxviye"]
+
+[ext_resource type="Script" uid="uid://bsn3l5rkpltej" path="res://ui/hud.gd" id="1_rbyyf"]
+
+[node name="HUD" type="CanvasLayer" unique_id=138115650]
+script = ExtResource("1_rbyyf")
+
+[node name="ScoreLabel" type="Label" parent="." unique_id=1644837496]
+offset_right = 40.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 32
+text = "Score:0"
+
+[node name="Restart Button" type="Button" parent="." unique_id=311237819]
+custom_minimum_size = Vector2(150, 50)
+offset_left = 1004.0
+offset_top = -6.0
+offset_right = 1154.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 20
+text = "RESTART"
