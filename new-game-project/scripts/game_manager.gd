@@ -28,6 +28,11 @@ var merge_rules = {
 @onready var win_label = $WinLabel
 @onready var game_over_label = $GameOverLabel
 
+@onready var merge_sound = $MergeSound
+@onready var invalid_sound = $InvalidSound
+@onready var win_sound = $WinSound
+@onready var game_over_sound = $GameOverSound
+
 func _ready():
 	win_label.visible = false
 	game_over_label.visible = false
@@ -65,8 +70,6 @@ func _on_tile_clicked(tile):
 	if game_won or game_over:
 		return
 
-	print("Selected: ", tile.tile_color)
-
 	if selected_tile == null:
 		selected_tile = tile
 		tile.scale = Vector2(1.3, 1.3)
@@ -93,27 +96,28 @@ func try_merge(tile_a, tile_b):
 		spawn_tile(old_position)
 
 		score += 10
+		merge_sound.play()
+
 		update_score()
 		check_win()
-
-		print("Merged! Score: ", score)
 	else:
 		invalid_moves += 1
+		invalid_sound.play()
+
 		update_score()
 		check_game_over()
-		print("Invalid merge. Mistakes: ", invalid_moves)
 
 func check_win():
-	if score >= WIN_SCORE:
+	if score >= WIN_SCORE and not game_won:
 		game_won = true
 		win_label.visible = true
-		print("You win!")
+		win_sound.play()
 
 func check_game_over():
-	if invalid_moves >= MAX_INVALID_MOVES:
+	if invalid_moves >= MAX_INVALID_MOVES and not game_over:
 		game_over = true
 		game_over_label.visible = true
-		print("Game over!")
+		game_over_sound.play()
 
 func _on_restart_pressed():
 	get_tree().reload_current_scene()
