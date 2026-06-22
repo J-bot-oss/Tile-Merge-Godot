@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://dulb2cpfcep2n"]
+
+[ext_resource type="Script" uid="uid://t31kll6fp7ek" path="res://ui/main_menu.gd" id="1_t7e0r"]
+
+[sub_resource type="SystemFont" id="SystemFont_gl0q7"]
+
+[sub_resource type="SystemFont" id="SystemFont_t7e0r"]
+
+[node name="Main Menu" type="Control" unique_id=1984400075]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_t7e0r")
+
+[node name="Background" type="ColorRect" parent="." unique_id=54746310]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 388.0
+offset_bottom = 423.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.13869928, 0.026626404, 0.16193159, 1)
+
+[node name="Label" type="Label" parent="." unique_id=696516590]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 48
+text = "TILE MERGE GAME "
+
+[node name="Play Button" type="Button" parent="." unique_id=1568810040]
+custom_minimum_size = Vector2(200, 60)
+layout_mode = 0
+offset_left = 125.0
+offset_top = 234.0
+offset_right = 325.0
+offset_bottom = 297.0
+theme_override_colors/font_color = Color(0.4117647, 0.9372549, 0.23137255, 1)
+theme_override_fonts/font = SubResource("SystemFont_gl0q7")
+theme_override_font_sizes/font_size = 40
+text = "Play"
+
+[node name="Instructions Button" type="Button" parent="." unique_id=565098036]
+custom_minimum_size = Vector2(200, 60)
+layout_mode = 0
+offset_left = 92.0
+offset_top = 328.0
+offset_right = 398.0
+offset_bottom = 391.0
+theme_override_colors/font_color = Color(0.8039216, 0.23137255, 0.07058824, 1)
+theme_override_fonts/font = SubResource("SystemFont_t7e0r")
+theme_override_font_sizes/font_size = 40
+text = "INSTRUCTIONS "
+
+[node name="Instructions Panel" type="Panel" parent="." unique_id=1637578072]
+visible = false
+custom_minimum_size = Vector2(600, 500)
+layout_mode = 0
+offset_left = -78.0
+offset_top = -4.0
+offset_right = 522.0
+offset_bottom = 496.0
+
+[node name="Label" type="Label" parent="Instructions Panel" unique_id=1907244393]
+layout_mode = 0
+offset_left = 163.0
+offset_top = 94.0
+offset_right = 422.0
+offset_bottom = 381.0
+theme_override_font_sizes/font_size = 18
+text = "HOW TO PLAY
+
+Click tiles to merge them.
+
+Red + Blue = Purple
+Blue + Yellow = Green
+Red + Yellow = Orange
+
+Reach the target score to win!
+No more moves = Game Over"
+
+[node name="Close Button" type="Button" parent="Instructions Panel" unique_id=803500095]
+layout_mode = 0
+offset_left = 231.0
+offset_top = 400.0
+offset_right = 289.0
+offset_bottom = 431.0
+theme_override_font_sizes/font_size = 20
+text = "CLOSE"
+
+[connection signal="pressed" from="Play Button" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="Instructions Button" to="." method="_on_instructions_button_pressed"]
+[connection signal="pressed" from="Instructions Panel/Close Button" to="." method="_on_close_button_pressed"]
