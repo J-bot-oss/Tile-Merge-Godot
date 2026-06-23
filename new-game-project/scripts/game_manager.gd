@@ -7,6 +7,8 @@ const MAX_INVALID_MOVES := 5
 
 var tile_scene = preload("res://scenes/Tile.tscn")
 var selected_tile = null
+var coward_tile = null
+
 var score := 0
 var invalid_moves := 0
 var game_won := false
@@ -41,6 +43,7 @@ func _ready():
 
 	create_grid()
 	update_score()
+	choose_coward_tile()
 
 	restart_button.pressed.connect(_on_restart_pressed)
 
@@ -56,18 +59,24 @@ func spawn_tile(grid_pos):
 	var tile = tile_scene.instantiate()
 	add_child(tile)
 
-	tile.position = Vector2(
-		200 + grid_pos.x * TILE_SIZE,
-		120 + grid_pos.y * TILE_SIZE
-	)
-
+	tile.position = grid_to_world(grid_pos)
 	tile.setup(colors.pick_random(), grid_pos)
 	tile.tile_clicked.connect(_on_tile_clicked)
 
 	return tile
 
+func grid_to_world(grid_pos):
+	return Vector2(
+		200 + grid_pos.x * TILE_SIZE,
+		120 + grid_pos.y * TILE_SIZE
+	)
+
 func _on_tile_clicked(tile):
 	if game_won or game_over:
+		return
+
+	if tile == coward_tile:
+		move_coward_tile()
 		return
 
 	if selected_tile == null:
@@ -100,12 +109,36 @@ func try_merge(tile_a, tile_b):
 
 		update_score()
 		check_win()
+		choose_coward_tile()
 	else:
 		invalid_moves += 1
 		invalid_sound.play()
 
 		update_score()
 		check_game_over()
+
+func choose_coward_tile():
+	var tiles = get_tree().get_nodes_in_group("tiles")
+
+	if tiles.size() == 0:
+		return
+
+	coward_tile = tiles.pick_random()
+	coward_tile.scale = Vector2(1.15, 1.15)
+
+func move_coward_tile():
+	if coward_tile == null:
+		return
+
+	var new_pos = Vector2i(
+		randi_range(0, GRID_SIZE - 1),
+		randi_range(0, GRID_SIZE - 1)
+	)
+
+	coward_tile.grid_position = new_pos
+	coward_tile.position = grid_to_world(new_pos)
+
+	print("Coward tile ran away!")
 
 func check_win():
 	if score >= WIN_SCORE and not game_won:

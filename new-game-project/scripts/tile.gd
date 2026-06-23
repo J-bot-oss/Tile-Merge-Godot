@@ -8,6 +8,7 @@ var grid_position = Vector2i.ZERO
 @onready var color_rect = $ColorRect
 
 func _ready():
+	add_to_group("tiles")
 	custom_minimum_size = Vector2(80, 80)
 	pressed.connect(_on_pressed)
 	update_color()
