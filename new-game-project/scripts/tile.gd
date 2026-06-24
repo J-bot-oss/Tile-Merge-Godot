@@ -36,6 +36,12 @@ func update_color():
 			color_rect.color = Color.GREEN
 		"orange":
 			color_rect.color = Color.ORANGE
+		"brown":
+			color_rect.color = Color.SADDLE_BROWN
+		"lime":
+			color_rect.color = Color.LIME
+		"pink":
+			color_rect.color = Color.PINK
 		_:
 			color_rect.color = Color.WHITE
 
