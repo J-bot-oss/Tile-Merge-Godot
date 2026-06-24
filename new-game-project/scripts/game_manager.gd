@@ -2,10 +2,11 @@ extends Node2D
 
 const GRID_SIZE := 4
 const TILE_SIZE := 90
-const WIN_SCORE := 100
+const WIN_SCORE := 150
 const MAX_INVALID_MOVES := 5
 
 var tile_scene = preload("res://scenes/Tile.tscn")
+
 var selected_tile = null
 var coward_tile = null
 
@@ -34,6 +35,7 @@ var merge_rules = {
 @onready var invalid_sound = $InvalidSound
 @onready var win_sound = $WinSound
 @onready var game_over_sound = $GameOverSound
+@onready var dance_timer = $DanceTimer
 
 func _ready():
 	win_label.visible = false
@@ -46,9 +48,10 @@ func _ready():
 	choose_coward_tile()
 
 	restart_button.pressed.connect(_on_restart_pressed)
+	dance_timer.timeout.connect(_on_dance_timer_timeout)
 
 func update_score():
-	score_label.text = "Score: " + str(score) + " | Mistakes: " + str(invalid_moves) + "/" + str(MAX_INVALID_MOVES)
+	score_label.text = "Score: " + str(score) + "/" + str(WIN_SCORE) + " | Mistakes: " + str(invalid_moves) + "/" + str(MAX_INVALID_MOVES)
 
 func create_grid():
 	for y in range(GRID_SIZE):
@@ -77,6 +80,7 @@ func _on_tile_clicked(tile):
 
 	if tile == coward_tile:
 		move_coward_tile()
+		add_invalid_move()
 		return
 
 	if selected_tile == null:
@@ -89,10 +93,17 @@ func _on_tile_clicked(tile):
 		selected_tile = null
 		return
 
-	try_merge(selected_tile, tile)
+	if are_tiles_adjacent(selected_tile, tile):
+		try_merge(selected_tile, tile)
+	else:
+		add_invalid_move()
 
 	selected_tile.scale = Vector2.ONE
 	selected_tile = null
+
+func are_tiles_adjacent(tile_a, tile_b):
+	var difference = tile_a.grid_position - tile_b.grid_position
+	return abs(difference.x) + abs(difference.y) == 1
 
 func try_merge(tile_a, tile_b):
 	var key = tile_a.tile_color + "+" + tile_b.tile_color
@@ -110,12 +121,21 @@ func try_merge(tile_a, tile_b):
 		update_score()
 		check_win()
 		choose_coward_tile()
-	else:
-		invalid_moves += 1
-		invalid_sound.play()
 
-		update_score()
-		check_game_over()
+		if score >= 80 and not game_won:
+			unfair_shuffle()
+	else:
+		add_invalid_move()
+
+func add_invalid_move():
+	invalid_moves += 1
+	invalid_sound.play()
+
+	update_score()
+	check_game_over()
+
+	if score >= 50 and not game_over:
+		unfair_shuffle()
 
 func choose_coward_tile():
 	var tiles = get_tree().get_nodes_in_group("tiles")
@@ -123,11 +143,14 @@ func choose_coward_tile():
 	if tiles.size() == 0:
 		return
 
+	if coward_tile != null and is_instance_valid(coward_tile):
+		coward_tile.scale = Vector2.ONE
+
 	coward_tile = tiles.pick_random()
 	coward_tile.scale = Vector2(1.15, 1.15)
 
 func move_coward_tile():
-	if coward_tile == null:
+	if coward_tile == null or not is_instance_valid(coward_tile):
 		return
 
 	var new_pos = Vector2i(
@@ -138,7 +161,33 @@ func move_coward_tile():
 	coward_tile.grid_position = new_pos
 	coward_tile.position = grid_to_world(new_pos)
 
-	print("Coward tile ran away!")
+func _on_dance_timer_timeout():
+	if game_won or game_over:
+		return
+
+	var tiles = get_tree().get_nodes_in_group("tiles")
+
+	if tiles.size() < 2:
+		return
+
+	var tile_a = tiles.pick_random()
+	var tile_b = tiles.pick_random()
+
+	while tile_a == tile_b:
+		tile_b = tiles.pick_random()
+
+	var pos_a = tile_a.grid_position
+	var pos_b = tile_b.grid_position
+
+	tile_a.grid_position = pos_b
+	tile_b.grid_position = pos_a
+
+	tile_a.position = grid_to_world(pos_b)
+	tile_b.position = grid_to_world(pos_a)
+
+func unfair_shuffle():
+	for i in range(3):
+		_on_dance_timer_timeout()
 
 func check_win():
 	if score >= WIN_SCORE and not game_won:

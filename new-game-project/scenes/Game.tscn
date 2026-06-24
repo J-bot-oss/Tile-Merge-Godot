@@ -65,3 +65,7 @@ stream = ExtResource("3_78awf")
 
 [node name="GameOverSound" type="AudioStreamPlayer2D" parent="." unique_id=1534469061]
 stream = ExtResource("4_s0nni")
+
+[node name="DanceTimer" type="Timer" parent="." unique_id=1127941593]
+wait_time = 5.0
+autostart = true
