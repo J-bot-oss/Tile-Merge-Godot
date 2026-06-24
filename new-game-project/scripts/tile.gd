@@ -8,6 +8,7 @@ var grid_position = Vector2i.ZERO
 @onready var color_rect = $ColorRect
 
 func _ready():
+	add_to_group("tiles")
 	custom_minimum_size = Vector2(80, 80)
 	pressed.connect(_on_pressed)
 	update_color()
@@ -35,6 +36,12 @@ func update_color():
 			color_rect.color = Color.GREEN
 		"orange":
 			color_rect.color = Color.ORANGE
+		"brown":
+			color_rect.color = Color.SADDLE_BROWN
+		"lime":
+			color_rect.color = Color.LIME
+		"pink":
+			color_rect.color = Color.PINK
 		_:
 			color_rect.color = Color.WHITE
 
