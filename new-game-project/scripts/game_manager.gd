@@ -48,6 +48,7 @@ var tile_scene = preload("res://scenes/Tile.tscn")
 # 3. GAME STATE VARIABLES
 # ============================================================
 
+const SAVE_PATH := "user://tile_merge_save.json"
 # Stores the first tile clicked by the player.
 # When the player clicks a second tile, the game checks if both
 # tiles can merge.
@@ -213,6 +214,8 @@ func _ready():
 	dance_timer.stop()
 
 	# Create an initial board, but hide it until the player starts.
+	load_progress()
+	
 	create_grid()
 	hide_all_tiles()
 
@@ -265,6 +268,10 @@ func unlock_next_level(next_level):
 	# unlocked level.
 	if next_level > max_unlocked_level:
 		max_unlocked_level = next_level
+
+		# Save the new unlocked level so progress is not lost
+		# when the game is closed and opened again.
+		save_progress()
 
 	# Refresh the level select buttons so newly unlocked levels appear.
 	update_level_select_buttons()
@@ -1005,7 +1012,41 @@ func swap_tiles_by_position(pos_a, pos_b):
 	tile_a.position = grid_to_world(pos_b)
 	tile_b.position = grid_to_world(pos_a)
 
+# ============================================================
+# SAVE SYSTEM
+# ============================================================
 
+# Saves the player's progress to a file.
+# Currently we only save the highest unlocked level.
+func save_progress():
+
+	var save_data = {
+		"max_unlocked_level": max_unlocked_level
+	}
+
+	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+
+	if file != null:
+		file.store_string(JSON.stringify(save_data))
+		file.close()
+
+# Loads the player's saved progress from the save file.
+func load_progress():
+	# If no save file exists yet, keep the default progress.
+	if not FileAccess.file_exists(SAVE_PATH):
+		return
+
+	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+
+	if file != null:
+		var content = file.get_as_text()
+		file.close()
+
+		var data = JSON.parse_string(content)
+
+		if data != null and data.has("max_unlocked_level"):
+			max_unlocked_level = int(data["max_unlocked_level"])		
+		
 # ============================================================
 # 20. RESTART BUTTON
 # ============================================================
