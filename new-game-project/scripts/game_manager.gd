@@ -1,10 +1,48 @@
 extends Node2D
 
+# ============================================================
+# TILE MERGE MADNESS - GAME MANAGER SCRIPT
+# ============================================================
+# This script controls the main game scene.
+#
+# It handles:
+# - Level selection
+# - Level locking and unlocking
+# - Saving and loading progress
+# - Tile spawning
+# - Tile clicking and merging
+# - Scoring
+# - Star ratings
+# - Level objectives
+# - Level complete screen
+# - Game over and win conditions
+# - Level intro and countdown
+# - Tile animations
+# - Level 3 chaos/ragebait mechanics
+# ============================================================
+
+
+# ============================================================
+# 1. BASIC GAME SETTINGS
+# ============================================================
+
 const GRID_SIZE := 4
 const TILE_SIZE := 90
 const MAX_INVALID_MOVES := 5
 
+const SAVE_PATH := "user://tile_merge_save.json"
+
+
+# ============================================================
+# 2. TILE SCENE
+# ============================================================
+
 var tile_scene = preload("res://scenes/Tile.tscn")
+
+
+# ============================================================
+# 3. GAME STATE VARIABLES
+# ============================================================
 
 var selected_tile = null
 var coward_tile = null
@@ -14,12 +52,32 @@ var score := 0
 var invalid_moves := 0
 var level := 1
 var target_score := 60
+
 var game_won := false
 var game_over := false
+var board_animating := false
+
+var max_unlocked_level := 1
+
+var level_stars = {
+	1: 0,
+	2: 0,
+	3: 0
+}
+
+
+# ============================================================
+# 4. LEVEL 2 OBJECTIVE COUNTERS
+# ============================================================
 
 var purple_count := 0
 var green_count := 0
 var orange_count := 0
+
+
+# ============================================================
+# 5. TILE COLOURS AND MERGE RULES
+# ============================================================
 
 var colors = ["red", "blue", "yellow"]
 
@@ -32,12 +90,18 @@ var merge_rules = {
 	"yellow+red": "orange"
 }
 
+
+# ============================================================
+# 6. UI REFERENCES
+# ============================================================
+
 @onready var score_label = $ScoreLabel
 @onready var level_label = $LevelLabel
 @onready var target_label = $TargetLabel
 @onready var restart_button = $RestartButton
 @onready var win_label = $WinLabel
 @onready var game_over_label = $GameOverLabel
+@onready var floating_score_label = $FloatingScoreLabel
 
 @onready var merge_sound = $MergeSound
 @onready var invalid_sound = $InvalidSound
@@ -45,21 +109,190 @@ var merge_rules = {
 @onready var game_over_sound = $GameOverSound
 @onready var dance_timer = $DanceTimer
 
+@onready var level_intro_panel = $LevelIntroPanel
+@onready var level_intro_label = $LevelIntroPanel/LevelIntroLabel
+@onready var countdown_label = $LevelIntroPanel/CountdownLabel
+@onready var start_level_button = $LevelIntroPanel/StartLevelButton
+
+@onready var level_select_panel = $LevelSelectPanel
+@onready var level_1_button = $LevelSelectPanel/Level1Button
+@onready var level_2_button = $LevelSelectPanel/Level2Button
+@onready var level_3_button = $LevelSelectPanel/Level3Button
+
+# Level complete popup UI.
+# This appears after the player successfully finishes a level.
+@onready var level_complete_panel = $LevelCompletePanel
+@onready var level_complete_title = $LevelCompletePanel/LevelCompleteTitle
+@onready var level_complete_stars = $LevelCompletePanel/LevelCompleteStars
+@onready var level_complete_stats = $LevelCompletePanel/LevelCompleteStats
+@onready var continue_button = $LevelCompletePanel/ContinueButton
+
+
+# ============================================================
+# 7. GAME STARTUP
+# ============================================================
+
 func _ready():
 	randomize()
 
 	win_label.visible = false
 	game_over_label.visible = false
+	floating_score_label.visible = false
+	level_intro_panel.visible = false
+	level_complete_panel.visible = false
+
+	level_select_panel.visible = true
+
 	win_label.z_index = 20
 	game_over_label.z_index = 20
+	floating_score_label.z_index = 30
+	level_select_panel.z_index = 60
+	level_complete_panel.z_index = 70
 
 	dance_timer.stop()
 
+	load_progress()
+
 	create_grid()
+	hide_all_tiles()
+
 	update_ui()
+	update_level_select_buttons()
 
 	restart_button.pressed.connect(_on_restart_pressed)
 	dance_timer.timeout.connect(_on_dance_timer_timeout)
+	start_level_button.pressed.connect(_on_start_level_pressed)
+	continue_button.pressed.connect(_on_continue_pressed)
+
+	level_1_button.pressed.connect(_on_level_1_pressed)
+	level_2_button.pressed.connect(_on_level_2_pressed)
+	level_3_button.pressed.connect(_on_level_3_pressed)
+
+	get_tree().paused = true
+
+
+# ============================================================
+# 8. LEVEL SELECT SYSTEM
+# ============================================================
+
+func get_star_text(level_number):
+	var stars = level_stars[level_number]
+
+	if stars == 3:
+		return "★★★"
+	elif stars == 2:
+		return "★★☆"
+	elif stars == 1:
+		return "★☆☆"
+	else:
+		return "☆☆☆"
+
+
+func update_level_select_buttons():
+	level_1_button.text = "Level 1  " + get_star_text(1)
+	level_1_button.disabled = false
+
+	if max_unlocked_level >= 2:
+		level_2_button.text = "Level 2  " + get_star_text(2)
+		level_2_button.disabled = false
+	else:
+		level_2_button.text = "🔒 Level 2"
+		level_2_button.disabled = true
+
+	if max_unlocked_level >= 3:
+		level_3_button.text = "Level 3  " + get_star_text(3)
+		level_3_button.disabled = false
+	else:
+		level_3_button.text = "🔒 Level 3"
+		level_3_button.disabled = true
+
+
+func unlock_next_level(next_level):
+	if next_level > max_unlocked_level:
+		max_unlocked_level = next_level
+		save_progress()
+
+	update_level_select_buttons()
+
+
+func show_level_select():
+	level_select_panel.visible = true
+	level_intro_panel.visible = false
+	level_complete_panel.visible = false
+	win_label.visible = false
+	game_over_label.visible = false
+	floating_score_label.visible = false
+
+	hide_all_tiles()
+	update_level_select_buttons()
+
+	get_tree().paused = true
+
+
+func start_selected_level(selected_level):
+	get_tree().paused = false
+
+	level = selected_level
+	score = 0
+	invalid_moves = 0
+	game_won = false
+	game_over = false
+	board_animating = false
+	selected_tile = null
+	coward_tile = null
+
+	purple_count = 0
+	green_count = 0
+	orange_count = 0
+
+	win_label.visible = false
+	game_over_label.visible = false
+	floating_score_label.visible = false
+	level_select_panel.visible = false
+	level_complete_panel.visible = false
+
+	dance_timer.stop()
+
+	if level == 1:
+		target_score = 60
+		reset_board_normal()
+
+	elif level == 2:
+		target_score = 120
+		reset_board_for_level_two()
+
+	elif level == 3:
+		target_score = 80
+		reset_board_for_level_three()
+
+		dance_timer.wait_time = 5
+		dance_timer.start()
+
+		choose_coward_tile()
+
+	hide_all_tiles()
+
+	update_ui()
+	show_level_intro()
+
+
+func _on_level_1_pressed():
+	start_selected_level(1)
+
+
+func _on_level_2_pressed():
+	if max_unlocked_level >= 2:
+		start_selected_level(2)
+
+
+func _on_level_3_pressed():
+	if max_unlocked_level >= 3:
+		start_selected_level(3)
+
+
+# ============================================================
+# 9. UI UPDATE
+# ============================================================
 
 func update_ui():
 	score_label.text = "Score: " + str(score) + "/" + str(target_score) + " | Mistakes: " + str(invalid_moves) + "/" + str(MAX_INVALID_MOVES)
@@ -67,23 +300,64 @@ func update_ui():
 
 	if level == 1:
 		target_label.text = "Goal:\nReach " + str(target_score) + " points"
+
 	elif level == 2:
 		target_label.text = "Targets:\nPurple: " + str(purple_count) + "/3\nGreen: " + str(green_count) + "/2\nOrange: " + str(orange_count) + "/2"
+
 	else:
 		target_label.text = "Survive:\nCoward tile + chaos board"
+
+
+# ============================================================
+# 10. BOARD CREATION AND TILE SPAWNING
+# ============================================================
 
 func create_grid():
 	grid_tiles.clear()
 
 	for y in range(GRID_SIZE):
 		for x in range(GRID_SIZE):
-			spawn_tile(Vector2i(x, y), colors.pick_random())
+			spawn_tile(Vector2i(x, y), colors.pick_random(), false)
 
-func spawn_tile(grid_pos, color_name = ""):
+
+func hide_all_tiles():
+	for tile in grid_tiles.values():
+		if tile != null and is_instance_valid(tile):
+			tile.visible = false
+
+
+func show_all_tiles_with_animation():
+	board_animating = true
+
+	var tile_number := 0
+
+	for y in range(GRID_SIZE):
+		for x in range(GRID_SIZE):
+			var grid_pos = Vector2i(x, y)
+
+			if grid_tiles.has(grid_pos):
+				var tile = grid_tiles[grid_pos]
+				var delay = tile_number * 0.08
+
+				animate_tile_drop(tile, grid_to_world(grid_pos), delay)
+				tile_number += 1
+
+	await get_tree().create_timer(1.6).timeout
+	board_animating = false
+
+
+func spawn_tile(grid_pos, color_name = "", animate := true):
 	var tile = tile_scene.instantiate()
 	add_child(tile)
 
-	tile.position = grid_to_world(grid_pos)
+	var final_position = grid_to_world(grid_pos)
+
+	if animate:
+		tile.position = final_position + Vector2(0, -500)
+		tile.scale = Vector2(0.85, 0.85)
+	else:
+		tile.position = final_position
+		tile.scale = Vector2.ONE
 
 	if color_name == "":
 		color_name = get_spawn_color_for_level()
@@ -92,13 +366,49 @@ func spawn_tile(grid_pos, color_name = ""):
 	tile.tile_clicked.connect(_on_tile_clicked)
 
 	grid_tiles[grid_pos] = tile
+
+	if animate:
+		animate_tile_drop(tile, final_position, 0.0)
+
 	return tile
+
+
+func animate_tile_drop(tile, final_position, delay := 0.0):
+	if tile == null or not is_instance_valid(tile):
+		return
+
+	tile.visible = true
+	tile.position = final_position + Vector2(0, -500)
+	tile.scale = Vector2(0.85, 0.85)
+
+	var tween = create_tween()
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+
+	if delay > 0:
+		tween.tween_interval(delay)
+
+	tween.tween_property(tile, "position", final_position, 0.35)
+	tween.tween_property(tile, "scale", Vector2(1.12, 1.12), 0.12)
+	tween.tween_property(tile, "scale", Vector2.ONE, 0.10)
+
+
+func grid_to_world(grid_pos):
+	return Vector2(
+		200 + grid_pos.x * TILE_SIZE,
+		120 + grid_pos.y * TILE_SIZE
+	)
+
+
+# ============================================================
+# 11. TILE SPAWNING LOGIC
+# ============================================================
 
 func get_spawn_color_for_level():
 	if level == 2:
 		return get_level_two_spawn_color()
 
 	return colors.pick_random()
+
 
 func get_level_two_spawn_color():
 	var needed_ingredients = []
@@ -120,14 +430,13 @@ func get_level_two_spawn_color():
 
 	return colors.pick_random()
 
-func grid_to_world(grid_pos):
-	return Vector2(
-		200 + grid_pos.x * TILE_SIZE,
-		120 + grid_pos.y * TILE_SIZE
-	)
+
+# ============================================================
+# 12. TILE CLICKING AND MERGING
+# ============================================================
 
 func _on_tile_clicked(tile):
-	if game_won or game_over:
+	if game_won or game_over or board_animating:
 		return
 
 	if level == 3 and tile == coward_tile:
@@ -147,33 +456,45 @@ func _on_tile_clicked(tile):
 		return
 
 	if are_tiles_adjacent(selected_tile, tile):
-		try_merge(selected_tile, tile)
+		await try_merge(selected_tile, tile)
 	else:
 		add_invalid_move()
 
-	selected_tile.scale = Vector2.ONE
+	if selected_tile != null and is_instance_valid(selected_tile):
+		selected_tile.scale = Vector2.ONE
+
 	selected_tile = null
+
 
 func are_tiles_adjacent(tile_a, tile_b):
 	var difference = tile_a.grid_position - tile_b.grid_position
 	return abs(difference.x) + abs(difference.y) == 1
 
+
 func try_merge(tile_a, tile_b):
 	var key = tile_a.tile_color + "+" + tile_b.tile_color
 
 	if merge_rules.has(key):
+		board_animating = true
+
 		var result_color = merge_rules[key]
 		var old_position = tile_b.grid_position
+		var score_position = (tile_a.position + tile_b.position) / 2
+
+		await animate_merge(tile_a, tile_b)
 
 		grid_tiles.erase(old_position)
 
 		tile_a.setup(result_color, tile_a.grid_position)
+		tile_a.scale = Vector2.ONE
+
 		tile_b.queue_free()
 
 		spawn_tile(old_position)
 
 		score += 10
 		merge_sound.play()
+		show_floating_score(score_position, 10)
 
 		if level == 2:
 			update_target_progress(result_color)
@@ -184,8 +505,158 @@ func try_merge(tile_a, tile_b):
 		if level == 3 and not game_won:
 			choose_coward_tile()
 			chaos_after_merge()
+
+		board_animating = false
 	else:
 		add_invalid_move()
+
+
+func animate_merge(tile_a, tile_b):
+	var original_pos_a = tile_a.position
+	var original_pos_b = tile_b.position
+	var center_pos = (original_pos_a + original_pos_b) / 2
+
+	var tween = create_tween()
+	tween.set_parallel(true)
+
+	tween.tween_property(tile_a, "position", center_pos, 0.18)
+	tween.tween_property(tile_b, "position", center_pos, 0.18)
+	tween.tween_property(tile_a, "scale", Vector2(0.75, 0.75), 0.18)
+	tween.tween_property(tile_b, "scale", Vector2(0.75, 0.75), 0.18)
+
+	await tween.finished
+
+	var pop_tween = create_tween()
+	pop_tween.tween_property(tile_a, "scale", Vector2(1.3, 1.3), 0.12)
+	pop_tween.tween_property(tile_a, "scale", Vector2.ONE, 0.12)
+
+	await pop_tween.finished
+
+	tile_a.position = original_pos_a
+
+
+func show_floating_score(start_position, amount):
+	floating_score_label.text = "+" + str(amount)
+	floating_score_label.position = start_position + Vector2(15, -10)
+	floating_score_label.scale = Vector2.ONE
+	floating_score_label.modulate.a = 1.0
+	floating_score_label.visible = true
+
+	var tween = create_tween()
+	tween.set_parallel(true)
+
+	tween.tween_property(floating_score_label, "position", floating_score_label.position + Vector2(0, -55), 0.7)
+	tween.tween_property(floating_score_label, "modulate:a", 0.0, 0.7)
+	tween.tween_property(floating_score_label, "scale", Vector2(1.25, 1.25), 0.18)
+
+	await tween.finished
+
+	floating_score_label.visible = false
+	floating_score_label.modulate.a = 1.0
+	floating_score_label.scale = Vector2.ONE
+
+
+# ============================================================
+# 13. LEVEL PROGRESSION, STARS, AND COMPLETE SCREEN
+# ============================================================
+
+func calculate_stars():
+	if invalid_moves == 0:
+		return 3
+	elif invalid_moves <= 2:
+		return 2
+	else:
+		return 1
+
+
+func get_star_display(stars):
+	if stars == 3:
+		return "★★★"
+	elif stars == 2:
+		return "★★☆"
+	elif stars == 1:
+		return "★☆☆"
+
+	return "☆☆☆"
+
+
+func save_level_stars(completed_level):
+	var stars_earned = calculate_stars()
+
+	if stars_earned > level_stars[completed_level]:
+		level_stars[completed_level] = stars_earned
+		save_progress()
+
+
+func show_level_complete(completed_level):
+	# Calculate how many stars the player earned based on mistakes.
+	var stars_earned = calculate_stars()
+
+	# Save the player's best star rating for this level.
+	save_level_stars(completed_level)
+
+	# Unlock the next level if the completed level is not the final level.
+	if completed_level < 3:
+		unlock_next_level(completed_level + 1)
+
+	# Prepare the level complete panel text.
+	level_complete_title.text = "LEVEL " + str(completed_level) + " COMPLETE!"
+	level_complete_stats.text = "Score: " + str(score) + "\nMistakes: " + str(invalid_moves)
+
+	# Start with empty stars before revealing them.
+	level_complete_stars.text = "☆☆☆"
+
+	# Disable Continue while the star animation is playing.
+	continue_button.disabled = true
+
+	# Show the panel and pause gameplay.
+	level_complete_panel.visible = true
+	get_tree().paused = true
+
+	# Reveal stars one by one.
+	await animate_star_reveal(stars_earned)
+
+	# Allow the player to continue after the reward animation finishes.
+	continue_button.disabled = false
+	
+func animate_star_reveal(stars_earned):
+	# This function reveals the earned stars one by one.
+	# It makes level completion feel more rewarding than showing all stars instantly.
+	#
+	# Example:
+	# 0. Start: ☆☆☆
+	# 1. First reveal: ★☆☆
+	# 2. Second reveal: ★★☆
+	# 3. Third reveal: ★★★
+
+	var current_display := "☆☆☆"
+
+	for i in range(stars_earned):
+		await get_tree().create_timer(0.35, true).timeout
+
+		if i == 0:
+			current_display = "★☆☆"
+		elif i == 1:
+			current_display = "★★☆"
+		elif i == 2:
+			current_display = "★★★"
+
+		level_complete_stars.text = current_display
+
+		# Small pop animation for the star label.
+		level_complete_stars.scale = Vector2(1.35, 1.35)
+
+		var tween = create_tween()
+		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tween.tween_property(level_complete_stars, "scale", Vector2.ONE, 0.18)
+
+		await tween.finished
+
+
+func _on_continue_pressed():
+	level_complete_panel.visible = false
+	show_level_select()
+
 
 func update_target_progress(result_color):
 	if result_color == "purple":
@@ -194,6 +665,7 @@ func update_target_progress(result_color):
 		green_count += 1
 	elif result_color == "orange":
 		orange_count += 1
+
 
 func add_invalid_move():
 	invalid_moves += 1
@@ -205,76 +677,117 @@ func add_invalid_move():
 	if level == 3 and not game_over:
 		chaos_punish()
 
+
 func check_level_progress():
 	if level == 1 and score >= target_score:
-		level = 2
-		target_score = 120
-		score = 0
-		invalid_moves = 0
-
-		purple_count = 0
-		green_count = 0
-		orange_count = 0
-
-		reset_board_for_level_two()
-		show_level_message("LEVEL 2:\nCREATE TARGET COLOURS")
-		update_ui()
+		show_level_complete(1)
 		return
 
 	if level == 2:
 		if purple_count >= 3 and green_count >= 2 and orange_count >= 2:
-			level = 3
-			target_score = 80
-			score = 0
-			invalid_moves = 0
-
-			reset_board_for_level_three()
-
-			dance_timer.wait_time = 5
-			dance_timer.start()
-
-			choose_coward_tile()
-			show_level_message("LEVEL 3:\nTHE BOARD CHEATS")
-			update_ui()
+			show_level_complete(2)
 			return
 
 	if level == 3 and score >= target_score:
-		game_won = true
-		win_label.text = "YOU SURVIVED\nTHE TILES!"
-		win_label.visible = true
-		win_sound.play()
+		show_level_complete(3)
+		return
+
+
+func check_game_over():
+	if invalid_moves >= MAX_INVALID_MOVES and not game_over:
+		game_over = true
+		game_over_label.text = "GAME OVER!\nTHE TILES WON."
+		game_over_label.visible = true
+		game_over_sound.play()
+
+
+# ============================================================
+# 14. BOARD RESET FUNCTIONS
+# ============================================================
+
+func reset_board_normal():
+	clear_board()
+
+	for y in range(GRID_SIZE):
+		for x in range(GRID_SIZE):
+			spawn_tile(Vector2i(x, y), colors.pick_random(), false)
+
 
 func reset_board_for_level_two():
-	for tile in grid_tiles.values():
-		if tile != null and is_instance_valid(tile):
-			tile.queue_free()
-
-	grid_tiles.clear()
+	clear_board()
 
 	for y in range(GRID_SIZE):
 		for x in range(GRID_SIZE):
-			var grid_pos = Vector2i(x, y)
-			spawn_tile(grid_pos, get_level_two_spawn_color())
+			spawn_tile(Vector2i(x, y), get_level_two_spawn_color(), false)
+
 
 func reset_board_for_level_three():
+	clear_board()
+
+	for y in range(GRID_SIZE):
+		for x in range(GRID_SIZE):
+			spawn_tile(Vector2i(x, y), colors.pick_random(), false)
+
+
+func clear_board():
 	for tile in grid_tiles.values():
 		if tile != null and is_instance_valid(tile):
 			tile.queue_free()
 
 	grid_tiles.clear()
 
-	for y in range(GRID_SIZE):
-		for x in range(GRID_SIZE):
-			var grid_pos = Vector2i(x, y)
-			spawn_tile(grid_pos, colors.pick_random())
 
-func show_level_message(message):
-	win_label.text = message
-	win_label.visible = true
-	await get_tree().create_timer(1.8).timeout
+# ============================================================
+# 15. LEVEL INTRO AND COUNTDOWN
+# ============================================================
 
-	if not game_won:
-		win_label.visible = false
+func show_level_intro():
+	level_intro_panel.visible = true
+	start_level_button.visible = true
+	countdown_label.visible = false
+
+	get_tree().paused = true
+
+	if level == 1:
+		level_intro_label.text = "LEVEL 1\n\nGoal:\nReach 60 points.\n\nMerge adjacent tiles to score."
+
+	elif level == 2:
+		level_intro_label.text = "LEVEL 2\n\nGoal:\nCreate target colours.\n\nPurple: 3\nGreen: 2\nOrange: 2"
+
+	else:
+		level_intro_label.text = "LEVEL 3\n\nGoal:\nSurvive the ragebait board.\n\nCoward tiles and chaos begin."
+
+
+func _on_start_level_pressed():
+	start_level_button.visible = false
+	start_countdown()
+
+
+func start_countdown():
+	countdown_label.visible = true
+
+	countdown_label.text = "3"
+	await get_tree().create_timer(0.7, true, false, true).timeout
+
+	countdown_label.text = "2"
+	await get_tree().create_timer(0.7, true, false, true).timeout
+
+	countdown_label.text = "1"
+	await get_tree().create_timer(0.7, true, false, true).timeout
+
+	countdown_label.text = "GO!"
+	await get_tree().create_timer(0.5, true, false, true).timeout
+
+	countdown_label.visible = false
+	level_intro_panel.visible = false
+	get_tree().paused = false
+
+	await show_all_tiles_with_animation()
+
+
+# ============================================================
+# 16. LEVEL 3 CHAOS SYSTEM
+# ============================================================
 
 func choose_coward_tile():
 	var tiles = get_tree().get_nodes_in_group("tiles")
@@ -287,6 +800,7 @@ func choose_coward_tile():
 
 	coward_tile = tiles.pick_random()
 	coward_tile.scale = Vector2(1.2, 1.2)
+
 
 func move_coward_tile():
 	if coward_tile == null or not is_instance_valid(coward_tile):
@@ -307,11 +821,13 @@ func move_coward_tile():
 	var new_pos = possible_positions.pick_random()
 	swap_tiles_by_position(coward_tile.grid_position, new_pos)
 
+
 func _on_dance_timer_timeout():
-	if level != 3 or game_won or game_over:
+	if level != 3 or game_won or game_over or board_animating:
 		return
 
 	random_tile_swap()
+
 
 func chaos_after_merge():
 	var chance = randi_range(1, 100)
@@ -322,9 +838,11 @@ func chaos_after_merge():
 	if chance <= 35:
 		random_tile_swap()
 
+
 func chaos_punish():
 	random_tile_swap()
 	random_tile_swap()
+
 
 func random_tile_swap():
 	var tiles = get_tree().get_nodes_in_group("tiles")
@@ -339,6 +857,7 @@ func random_tile_swap():
 		tile_b = tiles.pick_random()
 
 	swap_tiles_by_position(tile_a.grid_position, tile_b.grid_position)
+
 
 func swap_tiles_by_position(pos_a, pos_b):
 	if not grid_tiles.has(pos_a) or not grid_tiles.has(pos_b):
@@ -362,12 +881,60 @@ func swap_tiles_by_position(pos_a, pos_b):
 	tile_a.position = grid_to_world(pos_b)
 	tile_b.position = grid_to_world(pos_a)
 
-func check_game_over():
-	if invalid_moves >= MAX_INVALID_MOVES and not game_over:
-		game_over = true
-		game_over_label.text = "GAME OVER!\nTHE TILES WON."
-		game_over_label.visible = true
-		game_over_sound.play()
+
+# ============================================================
+# 17. SAVE SYSTEM
+# ============================================================
+
+func save_progress():
+	var save_data = {
+		"max_unlocked_level": max_unlocked_level,
+		"level_stars": {
+			"1": level_stars[1],
+			"2": level_stars[2],
+			"3": level_stars[3]
+		}
+	}
+
+	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+
+	if file != null:
+		file.store_string(JSON.stringify(save_data))
+		file.close()
+
+
+func load_progress():
+	if not FileAccess.file_exists(SAVE_PATH):
+		return
+
+	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+
+	if file != null:
+		var content = file.get_as_text()
+		file.close()
+
+		var data = JSON.parse_string(content)
+
+		if data != null:
+			if data.has("max_unlocked_level"):
+				max_unlocked_level = int(data["max_unlocked_level"])
+
+			if data.has("level_stars"):
+				var saved_stars = data["level_stars"]
+
+				if saved_stars.has("1"):
+					level_stars[1] = int(saved_stars["1"])
+
+				if saved_stars.has("2"):
+					level_stars[2] = int(saved_stars["2"])
+
+				if saved_stars.has("3"):
+					level_stars[3] = int(saved_stars["3"])
+
+
+# ============================================================
+# 18. RESTART BUTTON
+# ============================================================
 
 func _on_restart_pressed():
-	get_tree().reload_current_scene()
+	show_level_select()
