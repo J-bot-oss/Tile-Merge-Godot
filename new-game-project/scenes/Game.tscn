@@ -1,27 +1,27 @@
-[gd_scene format=3 uid="uid://drlacdpqkw1eq"]
+[gd_scene load_steps=5 format=3 uid="uid://drlacdpqkw1eq"]
 
 [ext_resource type="Script" uid="uid://bnojt2dle3ak5" path="res://scripts/game_manager.gd" id="1_ibkli"]
-[ext_resource type="AudioStream" uid="uid://dycqglx2shu6l" path="res://assets/audio/sfx/merge.wav" id="2_qbsmt"]
-[ext_resource type="AudioStream" uid="uid://caqxrw1vfwmry" path="res://assets/audio/sfx/invalid_move.wav" id="3_78awf"]
-[ext_resource type="AudioStream" uid="uid://dihduk8tms0q" path="res://assets/audio/sfx/game_over.wav" id="4_s0nni"]
+[ext_resource type="AudioStream" uid="uid://dycqglx2shu6l" path="res://Assets/Audio/sfx/merge.wav" id="2_qbsmt"]
+[ext_resource type="AudioStream" uid="uid://caqxrw1vfwmry" path="res://Assets/Audio/sfx/invalid_move.wav" id="3_78awf"]
+[ext_resource type="AudioStream" uid="uid://dihduk8tms0q" path="res://Assets/Audio/sfx/game_over.wav" id="4_s0nni"]
 
-[node name="Game" type="Node2D" unique_id=560125462]
+[node name="Game" type="Node2D"]
 script = ExtResource("1_ibkli")
 
-[node name="ScoreLabel" type="Label" parent="." unique_id=1595891386]
+[node name="ScoreLabel" type="Label" parent="."]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 60.0
 offset_bottom = 43.0
 text = "Score: 0"
 
-[node name="RestartButton" type="Button" parent="." unique_id=72492577]
+[node name="RestartButton" type="Button" parent="."]
 offset_left = 120.0
 offset_top = 60.0
 offset_right = 220.0
 offset_bottom = 95.0
 
-[node name="TitleLabel" type="Label" parent="." unique_id=848434669]
+[node name="TitleLabel" type="Label" parent="."]
 offset_left = 300.0
 offset_top = 20.0
 offset_right = 460.0
@@ -29,7 +29,7 @@ offset_bottom = 43.0
 theme_override_font_sizes/font_size = 32
 text = "Tile Merge Madness"
 
-[node name="InstructionsLabel" type="Label" parent="." unique_id=1010722958]
+[node name="InstructionsLabel" type="Label" parent="."]
 offset_left = 250.0
 offset_top = 65.0
 offset_right = 657.0
@@ -40,7 +40,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="WinLabel" type="Label" parent="." unique_id=335472259]
+[node name="WinLabel" type="Label" parent="."]
 z_index = 20
 offset_left = 350.0
 offset_top = 300.0
@@ -51,7 +51,7 @@ text = "YOU WIN!"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="GameOverLabel" type="Label" parent="." unique_id=1587234428]
+[node name="GameOverLabel" type="Label" parent="."]
 z_index = 10
 offset_left = 320.0
 offset_top = 280.0
@@ -60,28 +60,28 @@ offset_bottom = 303.0
 theme_override_font_sizes/font_size = 48
 text = "GAME OVER!"
 
-[node name="MergeSound" type="AudioStreamPlayer2D" parent="." unique_id=574460923]
+[node name="MergeSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("2_qbsmt")
 
-[node name="InvalidSound" type="AudioStreamPlayer2D" parent="." unique_id=74748663]
+[node name="InvalidSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("3_78awf")
 
-[node name="WinSound" type="AudioStreamPlayer2D" parent="." unique_id=653580871]
+[node name="WinSound" type="AudioStreamPlayer2D" parent="."]
 
-[node name="GameOverSound" type="AudioStreamPlayer2D" parent="." unique_id=1534469061]
+[node name="GameOverSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("4_s0nni")
 
-[node name="DanceTimer" type="Timer" parent="." unique_id=1127941593]
+[node name="DanceTimer" type="Timer" parent="."]
 autostart = true
 
-[node name="LevelLabel" type="Label" parent="." unique_id=2012623739]
+[node name="LevelLabel" type="Label" parent="."]
 offset_left = 20.0
 offset_top = 60.0
 offset_right = 60.0
 offset_bottom = 83.0
 text = "Level:1"
 
-[node name="TargetLabel" type="Label" parent="." unique_id=840858360]
+[node name="TargetLabel" type="Label" parent="."]
 offset_left = 20.0
 offset_top = 120.0
 offset_right = 320.0
