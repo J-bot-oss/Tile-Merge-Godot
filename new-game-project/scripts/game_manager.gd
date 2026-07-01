@@ -589,19 +589,68 @@ func save_level_stars(completed_level):
 
 
 func show_level_complete(completed_level):
+	# Calculate how many stars the player earned based on mistakes.
 	var stars_earned = calculate_stars()
 
+	# Save the player's best star rating for this level.
 	save_level_stars(completed_level)
 
+	# Unlock the next level if the completed level is not the final level.
 	if completed_level < 3:
 		unlock_next_level(completed_level + 1)
 
+	# Prepare the level complete panel text.
 	level_complete_title.text = "LEVEL " + str(completed_level) + " COMPLETE!"
-	level_complete_stars.text = get_star_display(stars_earned)
 	level_complete_stats.text = "Score: " + str(score) + "\nMistakes: " + str(invalid_moves)
 
+	# Start with empty stars before revealing them.
+	level_complete_stars.text = "☆☆☆"
+
+	# Disable Continue while the star animation is playing.
+	continue_button.disabled = true
+
+	# Show the panel and pause gameplay.
 	level_complete_panel.visible = true
 	get_tree().paused = true
+
+	# Reveal stars one by one.
+	await animate_star_reveal(stars_earned)
+
+	# Allow the player to continue after the reward animation finishes.
+	continue_button.disabled = false
+	
+func animate_star_reveal(stars_earned):
+	# This function reveals the earned stars one by one.
+	# It makes level completion feel more rewarding than showing all stars instantly.
+	#
+	# Example:
+	# 0. Start: ☆☆☆
+	# 1. First reveal: ★☆☆
+	# 2. Second reveal: ★★☆
+	# 3. Third reveal: ★★★
+
+	var current_display := "☆☆☆"
+
+	for i in range(stars_earned):
+		await get_tree().create_timer(0.35, true).timeout
+
+		if i == 0:
+			current_display = "★☆☆"
+		elif i == 1:
+			current_display = "★★☆"
+		elif i == 2:
+			current_display = "★★★"
+
+		level_complete_stars.text = current_display
+
+		# Small pop animation for the star label.
+		level_complete_stars.scale = Vector2(1.35, 1.35)
+
+		var tween = create_tween()
+		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tween.tween_property(level_complete_stars, "scale", Vector2.ONE, 0.18)
+
+		await tween.finished
 
 
 func _on_continue_pressed():
