@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://drlacdpqkw1eq"]
+[gd_scene load_steps=16 format=3 uid="uid://drlacdpqkw1eq"]
 
 [ext_resource type="Script" uid="uid://bnojt2dle3ak5" path="res://scripts/game_manager.gd" id="1_ibkli"]
 [ext_resource type="AudioStream" uid="uid://dycqglx2shu6l" path="res://Assets/Audio/sfx/merge.wav" id="2_qbsmt"]
@@ -8,9 +8,11 @@
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_78awf"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3xj3m"]
-texture = ExtResource("5_s0nni")
-region_rect = Rect2(27, 373, 161, 45)
+[sub_resource type="Theme" id="Theme_s0nni"]
+Button/colors/icon_normal_color = Color(1, 0.411765, 0.705882, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s0nni"]
+bg_color = Color(1, 0.411765, 0.705882, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mcffj"]
 texture = ExtResource("5_s0nni")
@@ -48,7 +50,9 @@ offset_left = 120.0
 offset_top = 60.0
 offset_right = 220.0
 offset_bottom = 95.0
-theme_override_styles/normal = SubResource("StyleBoxTexture_3xj3m")
+theme = SubResource("Theme_s0nni")
+theme_override_styles/normal = SubResource("StyleBoxFlat_s0nni")
+text = "RESTART"
 
 [node name="TitleLabel" type="Label" parent="."]
 offset_left = 364.0
