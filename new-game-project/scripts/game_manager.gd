@@ -169,7 +169,8 @@ func _ready():
 	level_3_button.pressed.connect(_on_level_3_pressed)
 
 	get_tree().paused = true
-
+	
+	
 
 # ============================================================
 # 8. LEVEL SELECT SYSTEM

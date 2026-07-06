@@ -4,6 +4,7 @@
 [ext_resource type="AudioStream" uid="uid://dycqglx2shu6l" path="res://assets/audio/sfx/merge.wav" id="2_qbsmt"]
 [ext_resource type="AudioStream" uid="uid://caqxrw1vfwmry" path="res://assets/audio/sfx/invalid_move.wav" id="3_78awf"]
 [ext_resource type="AudioStream" uid="uid://dihduk8tms0q" path="res://assets/audio/sfx/game_over.wav" id="4_s0nni"]
+[ext_resource type="PackedScene" uid="uid://cegaxs2vqyhil" path="res://scenes/UI/level_complete_panel.tscn" id="5_s0nni"]
 
 [node name="Game" type="Node2D" unique_id=560125462]
 script = ExtResource("1_ibkli")
@@ -84,7 +85,7 @@ text = "Level:1"
 [node name="TargetLabel" type="Label" parent="." unique_id=840858360]
 offset_left = 20.0
 offset_top = 120.0
-offset_right = 320.0
+offset_right = 124.0
 offset_bottom = 240.0
 text = "Targets:
 Purple: 0/3
@@ -181,49 +182,4 @@ offset_right = 350.0
 offset_bottom = 305.0
 text = "🔒 Level 3"
 
-[node name="LevelCompletePanel" type="ColorRect" parent="." unique_id=630311317]
-process_mode = 2
-z_index = 70
-offset_left = 220.0
-offset_top = 120.0
-offset_right = 640.0
-offset_bottom = 420.0
-color = Color(0.6627451, 0.6627451, 0.6627451, 1)
-
-[node name="LevelCompleteTitle" type="Label" parent="LevelCompletePanel" unique_id=85839485]
-process_mode = 2
-layout_mode = 0
-offset_left = 60.0
-offset_top = 25.0
-offset_right = 360.0
-offset_bottom = 70.0
-text = "LEVEL COMPLETE!"
-horizontal_alignment = 1
-
-[node name="LevelCompleteStars" type="Label" parent="LevelCompletePanel" unique_id=992520842]
-process_mode = 2
-layout_mode = 0
-offset_left = 120.0
-offset_top = 85.0
-offset_right = 300.0
-offset_bottom = 135.0
-text = "☆☆☆"
-horizontal_alignment = 1
-
-[node name="LevelCompleteStats" type="Label" parent="LevelCompletePanel" unique_id=834042104]
-process_mode = 2
-layout_mode = 0
-offset_left = 80.0
-offset_top = 145.0
-offset_right = 340.0
-offset_bottom = 215.0
-text = "Score: 0"
-horizontal_alignment = 1
-
-[node name="ContinueButton" type="Button" parent="LevelCompletePanel" unique_id=1781445681]
-layout_mode = 0
-offset_left = 140.0
-offset_top = 235.0
-offset_right = 280.0
-offset_bottom = 280.0
-text = "Continue"
+[node name="LevelCompletePanel" parent="." unique_id=249239233 instance=ExtResource("5_s0nni")]
