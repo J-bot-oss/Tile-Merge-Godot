@@ -1,6 +1,6 @@
 extends ProgressBar
 
-static var next_scene_path: String = "res://scenes/Game.tscn"
+static var next_scene_path: String = ""
 var progress: Array[float] = []
 
 func _ready():

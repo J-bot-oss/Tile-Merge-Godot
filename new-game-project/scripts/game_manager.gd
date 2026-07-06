@@ -95,37 +95,40 @@ var merge_rules = {
 # 6. UI REFERENCES
 # ============================================================
 
-@onready var score_label = $ScoreLabel
-@onready var level_label = $LevelLabel
-@onready var target_label = $TargetLabel
-@onready var restart_button = $RestartButton
-@onready var win_label = $WinLabel
-@onready var game_over_label = $GameOverLabel
-@onready var floating_score_label = $FloatingScoreLabel
+@onready var hud_layer = $HUDLayer
+@onready var menu_layer = $MenuLayer
 
-@onready var merge_sound = $MergeSound
-@onready var invalid_sound = $InvalidSound
-@onready var win_sound = $WinSound
-@onready var game_over_sound = $GameOverSound
+@onready var score_label = $HUDLayer/ScoreLabel
+@onready var level_label = $HUDLayer/LevelLabel
+@onready var target_label = $TargetLabel
+@onready var restart_button = $HUDLayer/RestartButton
+@onready var win_label = $HUDLayer/WinLabel
+@onready var game_over_label = $GameOverLabel
+@onready var floating_score_label = $EffectsLayer/FloatingScoreLabel
+
+@onready var merge_sound = $AudioLayer/MergeSound
+@onready var invalid_sound = $AudioLayer/InvalidSound
+@onready var win_sound = $AudioLayer/WinSound
+@onready var game_over_sound = $AudioLayer/GameOverSound
 @onready var dance_timer = $DanceTimer
 
-@onready var level_intro_panel = $LevelIntroPanel
-@onready var level_intro_label = $LevelIntroPanel/LevelIntroLabel
-@onready var countdown_label = $LevelIntroPanel/CountdownLabel
-@onready var start_level_button = $LevelIntroPanel/StartLevelButton
+@onready var level_intro_panel = $PopupLayer/LevelIntroPanel
+@onready var level_intro_label = $PopupLayer/LevelIntroPanel/LevelIntroLabel
+@onready var countdown_label = $PopupLayer/LevelIntroPanel/CountdownLabel
+@onready var start_level_button = $PopupLayer/LevelIntroPanel/StartLevelButton
 
-@onready var level_select_panel = $LevelSelectPanel
-@onready var level_1_button = $LevelSelectPanel/Level1Button
-@onready var level_2_button = $LevelSelectPanel/Level2Button
-@onready var level_3_button = $LevelSelectPanel/Level3Button
+@onready var level_select_panel = $MenuLayer/LevelSelectPanel
+@onready var level_1_button = $MenuLayer/LevelSelectPanel/Level1Button
+@onready var level_2_button = $MenuLayer/LevelSelectPanel/Level2Button
+@onready var level_3_button = $MenuLayer/LevelSelectPanel/Level3Button
 
 # Level complete popup UI.
 # This appears after the player successfully finishes a level.
-@onready var level_complete_panel = $LevelCompletePanel
-@onready var level_complete_title = $LevelCompletePanel/LevelCompleteTitle
-@onready var level_complete_stars = $LevelCompletePanel/LevelCompleteStars
-@onready var level_complete_stats = $LevelCompletePanel/LevelCompleteStats
-@onready var continue_button = $LevelCompletePanel/ContinueButton
+@onready var level_complete_panel = $PopupLayer/LevelCompletePanel
+@onready var level_complete_title = $PopupLayer/LevelCompletePanel/LevelCompleteTitle
+@onready var level_complete_stars = $PopupLayer/LevelCompletePanel/LevelCompleteStars
+@onready var level_complete_stats = $PopupLayer/LevelCompletePanel/LevelCompleteStats
+@onready var continue_button = $PopupLayer/LevelCompletePanel/ContinueButton
 
 
 # ============================================================
@@ -135,7 +138,10 @@ var merge_rules = {
 func _ready():
 	randomize()
 
-	win_label.visible = false
+	hud_layer.visible = false
+	menu_layer.visible = true
+
+	win_label.visible = true
 	game_over_label.visible = false
 	floating_score_label.visible = false
 	level_intro_panel.visible = false
@@ -216,6 +222,9 @@ func unlock_next_level(next_level):
 
 
 func show_level_select():
+	hud_layer.visible = false
+	menu_layer.visible = true
+
 	level_select_panel.visible = true
 	level_intro_panel.visible = false
 	level_complete_panel.visible = false
@@ -231,6 +240,9 @@ func show_level_select():
 
 func start_selected_level(selected_level):
 	get_tree().paused = false
+
+	hud_layer.visible = true
+	menu_layer.visible = false
 
 	level = selected_level
 	score = 0
@@ -618,7 +630,7 @@ func show_level_complete(completed_level):
 
 	# Allow the player to continue after the reward animation finishes.
 	continue_button.disabled = false
-	
+
 func animate_star_reveal(stars_earned):
 	# This function reveals the earned stars one by one.
 	# It makes level completion feel more rewarding than showing all stars instantly.
