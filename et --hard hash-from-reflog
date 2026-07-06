@@ -1,0 +1,26 @@
+[33m40cd3fa[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mUI-crash-tests[m[33m, [m[1;31morigin/UI-crash-tests[m[33m, [m[1;32mbackup-before-revert[m[33m)[m HEAD@{0}: pull: Merge made by the 'ort' strategy.
+[33m67ebedb[m HEAD@{1}: commit: UI implemented via loading screen
+[33m4834d41[m HEAD@{2}: commit: Implementing tests on the loading screen
+[33md93b5d5[m HEAD@{3}: commit: Seperated the load elements
+[33md3d113a[m HEAD@{4}: commit: Hustle with the UI
+[33m81e536a[m[33m ([m[1;32mmain[m[33m)[m HEAD@{5}: checkout: moving from main to UI-crash-tests
+[33m81e536a[m[33m ([m[1;32mmain[m[33m)[m HEAD@{6}: commit: Styled the buttons, do work on seperating the game scenes
+[33m109699c[m HEAD@{7}: commit: Added the loader scene, still being worked on
+[33m8072864[m HEAD@{8}: pull origin main: Merge made by the 'ort' strategy.
+[33m1c9fc1a[m HEAD@{9}: checkout: moving from vfx-sound to main
+[33mc267383[m[33m ([m[1;31morigin/vfx-sound[m[33m, [m[1;32mvfx-sound[m[33m)[m HEAD@{10}: checkout: moving from main to vfx-sound
+[33m1c9fc1a[m HEAD@{11}: commit: Sprite UI
+[33m8fb74c2[m HEAD@{12}: checkout: moving from vfx-sound to main
+[33mc267383[m[33m ([m[1;31morigin/vfx-sound[m[33m, [m[1;32mvfx-sound[m[33m)[m HEAD@{13}: reset: moving to HEAD
+[33mc267383[m[33m ([m[1;31morigin/vfx-sound[m[33m, [m[1;32mvfx-sound[m[33m)[m HEAD@{14}: pull origin main: Fast-forward
+[33m8c11366[m HEAD@{15}: pull origin main: Fast-forward
+[33m22f65ac[m HEAD@{16}: commit: Added ogg for backgronud music
+[33mac31676[m HEAD@{17}: commit: Reformat from mp3 to wav
+[33m55bd993[m HEAD@{18}: commit: Reformatted the files
+[33m6f6f9b9[m HEAD@{19}: commit: Background music
+[33macec978[m HEAD@{20}: commit: Added background music
+[33me12f52c[m HEAD@{21}: commit: Setting up the sound effects
+[33mf5c298c[m HEAD@{22}: commit: Added sfx sounds
+[33mee13f09[m HEAD@{23}: commit: Added sound assets
+[33m753735b[m HEAD@{24}: checkout: moving from main to vfx-sound
+[33m753735b[m HEAD@{25}: clone: from https://github.com/J-bot-oss/Tile-Merge-Godot.git
