@@ -1,47 +1,78 @@
-[gd_scene format=3 uid="uid://drlacdpqkw1eq"]
+[gd_scene load_steps=15 format=3 uid="uid://drlacdpqkw1eq"]
 
 [ext_resource type="Script" uid="uid://bnojt2dle3ak5" path="res://scripts/game_manager.gd" id="1_ibkli"]
 [ext_resource type="AudioStream" uid="uid://dycqglx2shu6l" path="res://assets/audio/sfx/merge.wav" id="2_qbsmt"]
 [ext_resource type="AudioStream" uid="uid://caqxrw1vfwmry" path="res://assets/audio/sfx/invalid_move.wav" id="3_78awf"]
 [ext_resource type="AudioStream" uid="uid://dihduk8tms0q" path="res://assets/audio/sfx/game_over.wav" id="4_s0nni"]
 [ext_resource type="PackedScene" uid="uid://cegaxs2vqyhil" path="res://scenes/UI/level_complete_panel.tscn" id="5_s0nni"]
+[ext_resource type="AudioStream" uid="uid://dycqglx2shu6l" path="res://Assets/Audio/sfx/merge.wav" id="2_qbsmt"]
+[ext_resource type="AudioStream" uid="uid://caqxrw1vfwmry" path="res://Assets/Audio/sfx/invalid_move.wav" id="3_78awf"]
+[ext_resource type="AudioStream" uid="uid://dihduk8tms0q" path="res://Assets/Audio/sfx/game_over.wav" id="4_s0nni"]
+[ext_resource type="Texture2D" uid="uid://bpn51y3l22wrf" path="res://Sprites/UI elements.jpeg" id="5_s0nni"]
 
-[node name="Game" type="Node2D" unique_id=560125462]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_78awf"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3xj3m"]
+texture = ExtResource("5_s0nni")
+region_rect = Rect2(27, 373, 161, 45)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mcffj"]
+texture = ExtResource("5_s0nni")
+region_rect = Rect2(1, -1, 386, 233)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kiw3p"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_400sg"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_g4kob"]
+texture = ExtResource("5_s0nni")
+region_rect = Rect2(25.172, 261, 162.828, 47)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_s0nni"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_aug50"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qy1jj"]
+texture = ExtResource("5_s0nni")
+region_rect = Rect2(844, 490, 164, 45)
+
+[node name="Game" type="Node2D"]
 script = ExtResource("1_ibkli")
 
-[node name="ScoreLabel" type="Label" parent="." unique_id=1595891386]
+[node name="ScoreLabel" type="Label" parent="."]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 60.0
 offset_bottom = 43.0
+theme_override_styles/normal = SubResource("StyleBoxTexture_78awf")
 text = "Score: 0"
 
-[node name="RestartButton" type="Button" parent="." unique_id=72492577]
+[node name="RestartButton" type="Button" parent="."]
 offset_left = 120.0
 offset_top = 60.0
 offset_right = 220.0
 offset_bottom = 95.0
+theme_override_styles/normal = SubResource("StyleBoxTexture_3xj3m")
 
-[node name="TitleLabel" type="Label" parent="." unique_id=848434669]
-offset_left = 300.0
-offset_top = 20.0
-offset_right = 460.0
-offset_bottom = 43.0
+[node name="TitleLabel" type="Label" parent="."]
+offset_left = 364.0
+offset_right = 639.0
+offset_bottom = 108.0
 theme_override_font_sizes/font_size = 32
-text = "Tile Merge Madness"
+theme_override_styles/normal = SubResource("StyleBoxTexture_mcffj")
 
-[node name="InstructionsLabel" type="Label" parent="." unique_id=1010722958]
-offset_left = 250.0
-offset_top = 65.0
-offset_right = 657.0
-offset_bottom = 88.0
+[node name="InstructionsLabel" type="Label" parent="."]
+offset_left = 294.0
+offset_top = 111.0
+offset_right = 701.0
+offset_bottom = 166.0
 theme_override_font_sizes/font_size = 18
 text = "Merge colours to create new colours and earn points"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="WinLabel" type="Label" parent="." unique_id=335472259]
+[node name="WinLabel" type="Label" parent="."]
 z_index = 20
 offset_left = 350.0
 offset_top = 300.0
@@ -52,7 +83,7 @@ text = "YOU WIN!"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="GameOverLabel" type="Label" parent="." unique_id=1587234428]
+[node name="GameOverLabel" type="Label" parent="."]
 z_index = 10
 offset_left = 320.0
 offset_top = 280.0
@@ -61,28 +92,29 @@ offset_bottom = 303.0
 theme_override_font_sizes/font_size = 48
 text = "GAME OVER!"
 
-[node name="MergeSound" type="AudioStreamPlayer2D" parent="." unique_id=574460923]
+[node name="MergeSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("2_qbsmt")
 
-[node name="InvalidSound" type="AudioStreamPlayer2D" parent="." unique_id=74748663]
+[node name="InvalidSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("3_78awf")
 
-[node name="WinSound" type="AudioStreamPlayer2D" parent="." unique_id=653580871]
+[node name="WinSound" type="AudioStreamPlayer2D" parent="."]
 
-[node name="GameOverSound" type="AudioStreamPlayer2D" parent="." unique_id=1534469061]
+[node name="GameOverSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("4_s0nni")
 
-[node name="DanceTimer" type="Timer" parent="." unique_id=1127941593]
+[node name="DanceTimer" type="Timer" parent="."]
 autostart = true
 
-[node name="LevelLabel" type="Label" parent="." unique_id=2012623739]
+[node name="LevelLabel" type="Label" parent="."]
 offset_left = 20.0
 offset_top = 60.0
 offset_right = 60.0
 offset_bottom = 83.0
+theme_override_styles/normal = SubResource("StyleBoxTexture_kiw3p")
 text = "Level:1"
 
-[node name="TargetLabel" type="Label" parent="." unique_id=840858360]
+[node name="TargetLabel" type="Label" parent="."]
 offset_left = 20.0
 offset_top = 120.0
 offset_right = 124.0
@@ -92,32 +124,32 @@ Purple: 0/3
 Green: 0/2
 Orange: 0/2"
 
-[node name="LevelIntroPanel" type="ColorRect" parent="." unique_id=306006379]
+[node name="LevelIntroPanel" type="ColorRect" parent="."]
 process_mode = 2
 z_index = 50
-offset_left = 200.0
-offset_top = 120.0
-offset_right = 620.0
-offset_bottom = 420.0
+offset_left = 296.0
+offset_top = 165.0
+offset_right = 716.0
+offset_bottom = 465.0
 color = Color(0, 0, 0, 1)
 
-[node name="LevelIntroLabel" type="Label" parent="LevelIntroPanel" unique_id=124608075]
+[node name="LevelIntroLabel" type="Label" parent="LevelIntroPanel"]
 layout_mode = 0
-offset_left = 30.0
-offset_top = 30.0
+offset_left = 43.0
+offset_top = 41.0
 offset_right = 390.0
 offset_bottom = 210.0
-text = "LEVEL 1"
+theme_override_styles/normal = SubResource("StyleBoxTexture_400sg")
 
-[node name="StartLevelButton" type="Button" parent="LevelIntroPanel" unique_id=1651244243]
+[node name="StartLevelButton" type="Button" parent="LevelIntroPanel"]
 layout_mode = 0
 offset_left = 150.0
 offset_top = 230.0
 offset_right = 270.0
 offset_bottom = 275.0
-text = "Start"
+theme_override_styles/normal = SubResource("StyleBoxTexture_g4kob")
 
-[node name="CountdownLabel" type="Label" parent="LevelIntroPanel" unique_id=650388098]
+[node name="CountdownLabel" type="Label" parent="LevelIntroPanel"]
 process_mode = 2
 visible = false
 layout_mode = 0
@@ -128,24 +160,25 @@ offset_bottom = 235.0
 theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
 
-[node name="FloatingScoreLabel" type="Label" parent="." unique_id=1394893276]
+[node name="FloatingScoreLabel" type="Label" parent="."]
 visible = false
 z_index = 30
 offset_right = 40.0
 offset_bottom = 23.0
 theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxTexture_s0nni")
 text = "+10"
 
-[node name="LevelSelectPanel" type="ColorRect" parent="." unique_id=1493481003]
+[node name="LevelSelectPanel" type="ColorRect" parent="."]
 process_mode = 2
 z_index = 60
-offset_left = 189.0
-offset_top = 99.0
-offset_right = 709.0
-offset_bottom = 519.0
-color = Color(0, 0, 0, 0.003921569)
+offset_left = 276.0
+offset_top = 160.0
+offset_right = 796.0
+offset_bottom = 580.0
+color = Color(0, 0, 0, 0.00392157)
 
-[node name="LevelSelectTitle" type="Label" parent="LevelSelectPanel" unique_id=630879000]
+[node name="LevelSelectTitle" type="Label" parent="LevelSelectPanel"]
 process_mode = 2
 layout_mode = 0
 offset_left = 130.0
@@ -154,7 +187,7 @@ offset_right = 261.0
 offset_bottom = 53.0
 text = "Tile Merge World"
 
-[node name="Level1Button" type="Button" parent="LevelSelectPanel" unique_id=2087082758]
+[node name="Level1Button" type="Button" parent="LevelSelectPanel"]
 process_mode = 2
 layout_mode = 0
 offset_left = 170.0
@@ -163,7 +196,7 @@ offset_right = 350.0
 offset_bottom = 165.0
 text = "Level 1  ☆☆☆"
 
-[node name="Level2Button" type="Button" parent="LevelSelectPanel" unique_id=1446698162]
+[node name="Level2Button" type="Button" parent="LevelSelectPanel"]
 process_mode = 2
 layout_mode = 0
 offset_left = 170.0
@@ -173,7 +206,7 @@ offset_bottom = 235.0
 text = "🔒 Level 2
 "
 
-[node name="Level3Button" type="Button" parent="LevelSelectPanel" unique_id=1682735828]
+[node name="Level3Button" type="Button" parent="LevelSelectPanel"]
 process_mode = 2
 layout_mode = 0
 offset_left = 170.0
@@ -183,3 +216,51 @@ offset_bottom = 305.0
 text = "🔒 Level 3"
 
 [node name="LevelCompletePanel" parent="." unique_id=249239233 instance=ExtResource("5_s0nni")]
+[node name="LevelCompletePanel" type="ColorRect" parent="."]
+process_mode = 2
+z_index = 70
+offset_left = 297.0
+offset_top = 229.0
+offset_right = 717.0
+offset_bottom = 529.0
+color = Color(0.917647, 0.847059, 0.639216, 1)
+
+[node name="LevelCompleteTitle" type="Label" parent="LevelCompletePanel"]
+process_mode = 2
+layout_mode = 0
+offset_left = 60.0
+offset_top = 25.0
+offset_right = 360.0
+offset_bottom = 70.0
+theme_override_styles/normal = SubResource("StyleBoxTexture_aug50")
+text = "LEVEL COMPLETE!"
+horizontal_alignment = 1
+
+[node name="LevelCompleteStars" type="Label" parent="LevelCompletePanel"]
+process_mode = 2
+layout_mode = 0
+offset_left = 120.0
+offset_top = 85.0
+offset_right = 300.0
+offset_bottom = 135.0
+text = "☆☆☆"
+horizontal_alignment = 1
+
+[node name="LevelCompleteStats" type="Label" parent="LevelCompletePanel"]
+process_mode = 2
+layout_mode = 0
+offset_left = 80.0
+offset_top = 145.0
+offset_right = 340.0
+offset_bottom = 215.0
+text = "Score: 0"
+horizontal_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="LevelCompletePanel"]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 235.0
+offset_right = 280.0
+offset_bottom = 280.0
+theme_override_styles/normal = SubResource("StyleBoxTexture_qy1jj")
+metadata/_edit_use_anchors_ = true
