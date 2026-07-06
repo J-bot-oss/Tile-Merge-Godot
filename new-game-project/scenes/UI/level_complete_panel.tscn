@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://cegaxs2vqyhil"]
+
+[node name="LevelCompletePanel" type="ColorRect" unique_id=249239233]
+process_mode = 2
+z_index = 70
+offset_left = 220.0
+offset_top = 120.0
+offset_right = 640.0
+offset_bottom = 520.0
+color = Color(0.6627451, 0.6627451, 0.6627451, 1)
+
+[node name="LevelCompleteTitle" type="Label" parent="." unique_id=1709890491]
+process_mode = 2
+layout_mode = 0
+offset_left = 60.0
+offset_top = 25.0
+offset_right = 360.0
+offset_bottom = 70.0
+text = "LEVEL COMPLETE!"
+horizontal_alignment = 1
+
+[node name="LevelCompleteStars" type="Label" parent="." unique_id=689109175]
+process_mode = 2
+layout_mode = 0
+offset_left = 120.0
+offset_top = 85.0
+offset_right = 300.0
+offset_bottom = 135.0
+text = "☆☆☆"
+horizontal_alignment = 1
+
+[node name="LevelCompleteStats" type="Label" parent="." unique_id=331658549]
+process_mode = 2
+layout_mode = 0
+offset_left = 80.0
+offset_top = 145.0
+offset_right = 340.0
+offset_bottom = 215.0
+text = "Score: 0"
+horizontal_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="." unique_id=598476730]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 235.0
+offset_right = 280.0
+offset_bottom = 280.0
+text = "Continue"
+
+[node name="CoinRewardLabel" type="Label" parent="." unique_id=1297096119]
+process_mode = 2
+layout_mode = 0
+offset_left = 80.0
+offset_top = 320.0
+offset_right = 340.0
+offset_bottom = 355.0
+text = "Coins: +0"
+horizontal_alignment = 1

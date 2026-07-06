@@ -1,6 +1,10 @@
 [gd_scene load_steps=15 format=3 uid="uid://drlacdpqkw1eq"]
 
 [ext_resource type="Script" uid="uid://bnojt2dle3ak5" path="res://scripts/game_manager.gd" id="1_ibkli"]
+[ext_resource type="AudioStream" uid="uid://dycqglx2shu6l" path="res://assets/audio/sfx/merge.wav" id="2_qbsmt"]
+[ext_resource type="AudioStream" uid="uid://caqxrw1vfwmry" path="res://assets/audio/sfx/invalid_move.wav" id="3_78awf"]
+[ext_resource type="AudioStream" uid="uid://dihduk8tms0q" path="res://assets/audio/sfx/game_over.wav" id="4_s0nni"]
+[ext_resource type="PackedScene" uid="uid://cegaxs2vqyhil" path="res://scenes/UI/level_complete_panel.tscn" id="5_s0nni"]
 [ext_resource type="AudioStream" uid="uid://dycqglx2shu6l" path="res://Assets/Audio/sfx/merge.wav" id="2_qbsmt"]
 [ext_resource type="AudioStream" uid="uid://caqxrw1vfwmry" path="res://Assets/Audio/sfx/invalid_move.wav" id="3_78awf"]
 [ext_resource type="AudioStream" uid="uid://dihduk8tms0q" path="res://Assets/Audio/sfx/game_over.wav" id="4_s0nni"]
@@ -113,7 +117,7 @@ text = "Level:1"
 [node name="TargetLabel" type="Label" parent="."]
 offset_left = 20.0
 offset_top = 120.0
-offset_right = 320.0
+offset_right = 124.0
 offset_bottom = 240.0
 text = "Targets:
 Purple: 0/3
@@ -211,6 +215,7 @@ offset_right = 350.0
 offset_bottom = 305.0
 text = "🔒 Level 3"
 
+[node name="LevelCompletePanel" parent="." unique_id=249239233 instance=ExtResource("5_s0nni")]
 [node name="LevelCompletePanel" type="ColorRect" parent="."]
 process_mode = 2
 z_index = 70
