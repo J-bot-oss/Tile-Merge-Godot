@@ -1,6 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://b3w2drim4ay2c"]
-
-[ext_resource type="Script" uid="uid://bfxgvfdttshp4" path="res://progress_bar.gd" id="1_hsw3t"]
+[gd_scene format=3 uid="uid://b3w2drim4ay2c"]
 
 [node name="Loader" type="Node2D"]
 
@@ -23,4 +21,3 @@ offset_right = -399.96
 offset_bottom = -274.68
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_hsw3t")

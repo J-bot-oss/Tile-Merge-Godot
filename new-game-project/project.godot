@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Tile Merge Game"
-run/main_scene="uid://drlacdpqkw1eq"
+run/main_scene="uid://cjjbgu8b0i2so"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
