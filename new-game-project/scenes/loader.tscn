@@ -1,23 +1,14 @@
-[gd_scene format=3 uid="uid://b3w2drim4ay2c"]
+[gd_scene load_steps=2 format=3 uid="uid://b3w2drim4ay2c"]
+
+[ext_resource type="Script" uid="uid://cot2kqmu3f1ud" path="res://scenes/loader.gd" id="1_hsw3t"]
 
 [node name="Loader" type="Node2D"]
+script = ExtResource("1_hsw3t")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="ProgressBar" type="ProgressBar" parent="."]
 offset_left = 350.0
-offset_top = 340.0
-offset_right = 390.0
-offset_bottom = 380.0
-
-[node name="ProgressBar" type="ProgressBar" parent="TextureRect"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = -8.446
-anchor_top = -8.181
-anchor_right = 19.899
-anchor_bottom = 7.542
-offset_left = 337.84
-offset_top = 327.24
-offset_right = -399.96
-offset_bottom = -274.68
-grow_horizontal = 2
-grow_vertical = 2
+offset_top = 250.0
+offset_right = 850.0
+offset_bottom = 300.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
