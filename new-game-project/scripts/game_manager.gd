@@ -10,7 +10,7 @@ extends Node2D
 # - Level locking and unlocking
 # - Saving and loading progress
 # - Tile spawning
-# - Tile clicking and merging
+# - Tile clicking and merging (now with recursive color tiers)
 # - Scoring
 # - Star ratings
 # - Level objectives
@@ -69,6 +69,10 @@ var level_stars = {
 # ============================================================
 # 4. LEVEL 2 OBJECTIVE COUNTERS
 # ============================================================
+# NOTE: these only track the FIRST-TIER creation of each secondary
+# color (i.e. a primary+primary merge). If the player later merges
+# that secondary tile again into a tertiary tile, these counts stay
+# exactly as they were — the objective was already satisfied.
 
 var purple_count := 0
 var green_count := 0
@@ -76,18 +80,65 @@ var orange_count := 0
 
 
 # ============================================================
-# 5. TILE COLOURS AND MERGE RULES
+# 5. TILE COLOURS AND MERGE RULES (now a full recursive tree)
 # ============================================================
 
+# Only the base spawnable colors. Everything above Tier 1 is only
+# ever created by merging - never spawned directly on the board.
 var colors = ["red", "blue", "yellow"]
 
+# color_data holds everything needed to describe and (later) render
+# every color in the game: which tier it belongs to, and the actual
+# colors to use for its visuals. Tier drives bonus scoring too.
+#
+# To add a Tier 5 later: just add new entries here + new pair(s) in
+# merge_rules below. Nothing else in the game needs to change.
+var color_data = {
+	# ---- Tier 1 : Primary (spawnable) ----
+	"red":     { "tier": 1, "value": Color(0.92, 0.24, 0.27), "accent": Color(1.00, 0.55, 0.55) },
+	"blue":    { "tier": 1, "value": Color(0.20, 0.45, 0.95), "accent": Color(0.55, 0.75, 1.00) },
+	"yellow":  { "tier": 1, "value": Color(0.98, 0.80, 0.20), "accent": Color(1.00, 0.92, 0.55) },
+
+	# ---- Tier 2 : Secondary ----
+	"purple":  { "tier": 2, "value": Color(0.55, 0.25, 0.75), "accent": Color(0.80, 0.60, 0.95) },
+	"green":   { "tier": 2, "value": Color(0.25, 0.70, 0.40), "accent": Color(0.60, 0.90, 0.65) },
+	"orange":  { "tier": 2, "value": Color(0.95, 0.55, 0.15), "accent": Color(1.00, 0.75, 0.45) },
+
+	# ---- Tier 3 : Tertiary ----
+	"indigo":  { "tier": 3, "value": Color(0.29, 0.20, 0.55), "accent": Color(0.55, 0.45, 0.85) },
+	"amber":   { "tier": 3, "value": Color(0.80, 0.60, 0.10), "accent": Color(1.00, 0.85, 0.40) },
+	"crimson": { "tier": 3, "value": Color(0.65, 0.10, 0.20), "accent": Color(0.90, 0.40, 0.45) },
+
+	# ---- Tier 4 : Prism (the ultimate tile - endgame) ----
+	"prism":   { "tier": 4, "value": Color(0.95, 0.85, 0.35), "accent": Color(1.00, 1.00, 1.00) },
+}
+
+# Bonus points awarded per tier of the RESULT color of a merge.
+# Tier 2 stays at 10 on purpose, so Level 1 (target 60) and
+# Level 3 (target 80) balance is completely unchanged from before.
+var tier_score_bonus = {
+	2: 10,
+	3: 25,
+	4: 100
+}
+
+# merge_rules is keyed by an order-independent "colorA+colorB" key
+# (built via get_merge_key so "red+blue" and "blue+red" both work).
 var merge_rules = {
-	"red+blue": "purple",
+	# Tier 1 + Tier 1 -> Tier 2
 	"blue+red": "purple",
 	"blue+yellow": "green",
-	"yellow+blue": "green",
 	"red+yellow": "orange",
-	"yellow+red": "orange"
+
+	# Tier 2 + Tier 2 -> Tier 3
+	"green+purple": "indigo",
+	"green+orange": "amber",
+	"orange+purple": "crimson",
+
+	# Tier 3 + Tier 3 -> Tier 4 (all roads lead to prism)
+	"amber+indigo": "prism",
+	"amber+crimson": "prism",
+	"crimson+indigo": "prism",
 }
 
 
@@ -414,6 +465,8 @@ func grid_to_world(grid_pos):
 # ============================================================
 # 11. TILE SPAWNING LOGIC
 # ============================================================
+# NOTE: the board only ever SPAWNS Tier 1 (primary) colors.
+# Every higher tier only ever appears as the result of a merge.
 
 func get_spawn_color_for_level():
 	if level == 2:
@@ -483,8 +536,17 @@ func are_tiles_adjacent(tile_a, tile_b):
 	return abs(difference.x) + abs(difference.y) == 1
 
 
+# Builds an order-independent key so "red+blue" and "blue+red" are
+# treated as the same merge, without needing duplicate dictionary
+# entries for every reversed pair.
+func get_merge_key(color_a, color_b):
+	var pair = [color_a, color_b]
+	pair.sort()
+	return pair[0] + "+" + pair[1]
+
+
 func try_merge(tile_a, tile_b):
-	var key = tile_a.tile_color + "+" + tile_b.tile_color
+	var key = get_merge_key(tile_a.tile_color, tile_b.tile_color)
 
 	if merge_rules.has(key):
 		board_animating = true
@@ -504,9 +566,15 @@ func try_merge(tile_a, tile_b):
 
 		spawn_tile(old_position)
 
-		score += 10
+		var result_tier = 1
+		if color_data.has(result_color):
+			result_tier = color_data[result_color]["tier"]
+
+		var points_earned = tier_score_bonus.get(result_tier, 10)
+
+		score += points_earned
 		merge_sound.play()
-		show_floating_score(score_position, 10)
+		show_floating_score(score_position, points_earned)
 
 		if level == 2:
 			update_target_progress(result_color)
@@ -761,7 +829,7 @@ func show_level_intro():
 	get_tree().paused = true
 
 	if level == 1:
-		level_intro_label.text = "LEVEL 1\n\nGoal:\nReach 60 points.\n\nMerge adjacent tiles to score."
+		level_intro_label.text = "LEVEL 1\n\nGoal:\nReach 60 points.\n\nMerge adjacent tiles to score.\nChain secondary colors into rarer ones for big bonus points!"
 
 	elif level == 2:
 		level_intro_label.text = "LEVEL 2\n\nGoal:\nCreate target colours.\n\nPurple: 3\nGreen: 2\nOrange: 2"
@@ -895,7 +963,32 @@ func swap_tiles_by_position(pos_a, pos_b):
 
 
 # ============================================================
-# 17. SAVE SYSTEM
+# 17. COLOR DATA ACCESSORS (for Tile.gd visuals to use)
+# ============================================================
+# Once you send me Tile.gd, these are what its polished visuals
+# will call into - e.g. get_node("/root/Game").get_color_value("indigo")
+# depending on your scene root node name.
+
+func get_color_value(color_name: String) -> Color:
+	if color_data.has(color_name):
+		return color_data[color_name]["value"]
+	return Color.WHITE
+
+
+func get_color_accent(color_name: String) -> Color:
+	if color_data.has(color_name):
+		return color_data[color_name]["accent"]
+	return Color.WHITE
+
+
+func get_color_tier(color_name: String) -> int:
+	if color_data.has(color_name):
+		return color_data[color_name]["tier"]
+	return 1
+
+
+# ============================================================
+# 18. SAVE SYSTEM
 # ============================================================
 
 func save_progress():
@@ -945,7 +1038,7 @@ func load_progress():
 
 
 # ============================================================
-# 18. RESTART BUTTON
+# 19. RESTART BUTTON
 # ============================================================
 
 func _on_restart_pressed():

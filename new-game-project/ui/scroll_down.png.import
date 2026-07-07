@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://i1ara1bjcoei"
-path="res://.godot/imported/Main menu UI.png-bb3881f3bd4cf17a70b620f29cfeb0c6.ctex"
+uid="uid://cx4dcx32sbvp3"
+path="res://.godot/imported/scroll_down.png-1925d6bacba159e7f109521665bcf17a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/Main menu UI.png"
-dest_files=["res://.godot/imported/Main menu UI.png-bb3881f3bd4cf17a70b620f29cfeb0c6.ctex"]
+source_file="res://ui/scroll_down.png"
+dest_files=["res://.godot/imported/scroll_down.png-1925d6bacba159e7f109521665bcf17a.ctex"]
 
 [params]
 

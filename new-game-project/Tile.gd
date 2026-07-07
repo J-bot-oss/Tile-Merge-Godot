@@ -1,24 +1,33 @@
-extends Button
+extends Node2D
 
 # ============================================================
 # TILE.GD - Visual + interaction script for a single tile
 # ============================================================
-# Node structure (unchanged from your project):
-#   Tile (Button)
-#    └─ ColorRect
+# Expected scene structure (Tile.tscn):
+#   Tile (Node2D)          <- this script goes here
+#    └─ ColorRect          <- untouched, keep its existing size/position
 #
-# Colors/gradients/glow are now pulled from GameManager's
-# color_data dictionary instead of a hardcoded match statement -
-# so adding a new tier later means editing GameManager only,
-# never this file again.
+# This script does NOT change the ColorRect's size or position in
+# the scene - it only adds a shader material + a small overlay
+# Label, both created at runtime. Nothing in Tile.tscn needs to
+# be edited by hand.
+#
+# What it adds:
+# - A shader on the ColorRect for rounded corners + gradient fill
+#   + soft glossy highlight (instead of a flat color square)
+# - A gentle pulsing glow on rare tiles (tier 3) and the ultimate
+#   "prism" tile (tier 4), so rarity is visually obvious
+# - A tiny tier icon (✦ / ✧✧ / ★) overlaid on the tile
+# - Same public interface as before: tile_color, grid_position,
+#   setup(color_name, grid_pos), and the tile_clicked(tile) signal
 # ============================================================
 
 signal tile_clicked(tile)
 
-var tile_color = "red"
-var grid_position = Vector2i.ZERO
+var tile_color: String = ""
+var grid_position: Vector2i = Vector2i.ZERO
 
-@onready var color_rect = $ColorRect
+@onready var color_rect: ColorRect = $ColorRect
 
 var tier_icon_label: Label = null
 var glow_tween: Tween = null
@@ -57,18 +66,6 @@ void fragment() {
 
 
 func _ready():
-	add_to_group("tiles")
-	custom_minimum_size = Vector2(80, 80)
-
-	# Strip the default Button chrome (bevel/border/focus ring) so
-	# only our styled ColorRect is visible - this is most of what
-	# was making tiles look "basic".
-	flat = true
-	focus_mode = Control.FOCUS_NONE
-	text = ""
-	modulate = Color.WHITE
-	self_modulate = Color.WHITE
-
 	if not (color_rect.material is ShaderMaterial):
 		var shader = Shader.new()
 		shader.code = TILE_SHADER_CODE
@@ -78,66 +75,38 @@ func _ready():
 
 		color_rect.material = shader_mat
 
-	pressed.connect(_on_pressed)
+	if not color_rect.gui_input.is_connected(_on_color_rect_gui_input):
+		color_rect.gui_input.connect(_on_color_rect_gui_input)
 
 	_ensure_tier_icon_label()
-	update_color()
 
 
-func setup(color_name, pos):
+func setup(color_name: String, new_grid_position: Vector2i):
 	tile_color = color_name
-	grid_position = pos
-	update_color()
+	grid_position = new_grid_position
 
-
-func update_color():
-	text = ""
-	modulate = Color.WHITE
-	self_modulate = Color.WHITE
-
-	var base_color := Color.WHITE
-	var accent_color := Color.WHITE
+	var base_color := Color(0.6, 0.6, 0.6)
+	var accent_color := Color(0.8, 0.8, 0.8)
 	var tier := 1
 
 	var game_manager = _find_game_manager()
 
-	if game_manager != null and game_manager.has_method("get_color_value"):
-		base_color = game_manager.get_color_value(tile_color)
-		accent_color = game_manager.get_color_accent(tile_color)
-		tier = game_manager.get_color_tier(tile_color)
-	else:
-		# Fallback so a tile never shows blank white if GameManager
-		# can't be found for some reason.
-		base_color = _fallback_color(tile_color)
-		accent_color = base_color
+	if game_manager != null:
+		base_color = game_manager.get_color_value(color_name)
+		accent_color = game_manager.get_color_accent(color_name)
+		tier = game_manager.get_color_tier(color_name)
 
 	if color_rect.material is ShaderMaterial:
 		color_rect.material.set_shader_parameter("base_color", base_color)
 		color_rect.material.set_shader_parameter("accent_color", accent_color)
-	else:
-		color_rect.color = base_color
 
 	_update_tier_icon(tier)
 	_update_glow_animation(tier)
 
 
-# Only used if GameManager can't be reached - keeps old colors working.
-func _fallback_color(color_name):
-	match color_name:
-		"red": return Color.RED
-		"blue": return Color.BLUE
-		"yellow": return Color.YELLOW
-		"purple": return Color.PURPLE
-		"green": return Color.GREEN
-		"orange": return Color.ORANGE
-		"brown": return Color.SADDLE_BROWN
-		"lime": return Color.LIME
-		"pink": return Color.PINK
-		_: return Color.WHITE
-
-
-# Walks up the tree looking for whichever node owns get_color_value() -
-# works regardless of what your GameManager's root node is named.
+# Walks up the tree looking for the node that owns get_color_value(),
+# instead of assuming a fixed node name/path. Works no matter what
+# your game manager's root node is called.
 func _find_game_manager():
 	var node = get_parent()
 
@@ -168,7 +137,7 @@ func _ensure_tier_icon_label():
 	color_rect.add_child(tier_icon_label)
 
 
-func _update_tier_icon(tier):
+func _update_tier_icon(tier: int):
 	if tier_icon_label == null:
 		return
 
@@ -182,7 +151,7 @@ func _update_tier_icon(tier):
 		tier_icon_label.text = ""
 
 
-func _update_glow_animation(tier):
+func _update_glow_animation(tier: int):
 	if glow_tween != null and glow_tween.is_valid():
 		glow_tween.kill()
 
@@ -201,11 +170,11 @@ func _update_glow_animation(tier):
 	glow_tween.tween_method(_set_glow_strength, target_strength, 0.15, 0.9)
 
 
-func _set_glow_strength(value):
+func _set_glow_strength(value: float):
 	if color_rect.material is ShaderMaterial:
 		color_rect.material.set_shader_parameter("glow_strength", value)
 
 
-func _on_pressed():
-	print("Tile clicked: ", tile_color)
-	tile_clicked.emit(self)
+func _on_color_rect_gui_input(event: InputEvent):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		tile_clicked.emit(self)

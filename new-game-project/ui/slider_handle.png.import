@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://i1ara1bjcoei"
-path="res://.godot/imported/Main menu UI.png-bb3881f3bd4cf17a70b620f29cfeb0c6.ctex"
+uid="uid://dricm7la7j7x5"
+path="res://.godot/imported/slider_handle.png-5feb64394a35b28490946323ff326cd1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/Main menu UI.png"
-dest_files=["res://.godot/imported/Main menu UI.png-bb3881f3bd4cf17a70b620f29cfeb0c6.ctex"]
+source_file="res://ui/slider_handle.png"
+dest_files=["res://.godot/imported/slider_handle.png-5feb64394a35b28490946323ff326cd1.ctex"]
 
 [params]
 
