@@ -80,37 +80,50 @@ var orange_count := 0
 
 
 # ============================================================
-# 5. TILE COLOURS AND MERGE RULES (now a full recursive tree)
+# 5. TILE COLOURS AND MERGE RULES (a real color-wheel tree)
 # ============================================================
 
 # Only the base spawnable colors. Everything above Tier 1 is only
 # ever created by merging - never spawned directly on the board.
 var colors = ["red", "blue", "yellow"]
 
-# color_data holds everything needed to describe and (later) render
-# every color in the game: which tier it belongs to, and the actual
+# color_data holds everything needed to describe and render every
+# color in the game: which tier it belongs to, and the actual
 # colors to use for its visuals. Tier drives bonus scoring too.
 #
-# To add a Tier 5 later: just add new entries here + new pair(s) in
+# This follows a real artist's color wheel:
+#   Tier 1 Primary:    Red, Yellow, Blue
+#   Tier 2 Secondary:  Orange, Green, Purple (primary + primary)
+#   Tier 3 Tertiary:   Vermilion, Amber, Chartreuse, Teal, Violet,
+#                       Magenta (a primary + its NEIGHBORING secondary)
+#   Tier 4 Prism:      merging two COMPLEMENTARY (opposite-on-the-
+#                       wheel) tertiary colors neutralizes them into
+#                       the ultimate Prism tile - same principle as
+#                       complementary colors mixing to white/gray.
+#
+# To extend further later: add new entries here + new pair(s) in
 # merge_rules below. Nothing else in the game needs to change.
 var color_data = {
 	# ---- Tier 1 : Primary (spawnable) ----
-	"red":     { "tier": 1, "value": Color(0.92, 0.24, 0.27), "accent": Color(1.00, 0.55, 0.55) },
-	"blue":    { "tier": 1, "value": Color(0.20, 0.45, 0.95), "accent": Color(0.55, 0.75, 1.00) },
-	"yellow":  { "tier": 1, "value": Color(0.98, 0.80, 0.20), "accent": Color(1.00, 0.92, 0.55) },
+	"red":         { "tier": 1, "value": Color(0.90, 0.16, 0.16), "accent": Color(1.00, 0.55, 0.50) },
+	"yellow":      { "tier": 1, "value": Color(0.98, 0.85, 0.20), "accent": Color(1.00, 0.95, 0.60) },
+	"blue":        { "tier": 1, "value": Color(0.15, 0.35, 0.85), "accent": Color(0.55, 0.70, 1.00) },
 
 	# ---- Tier 2 : Secondary ----
-	"purple":  { "tier": 2, "value": Color(0.55, 0.25, 0.75), "accent": Color(0.80, 0.60, 0.95) },
-	"green":   { "tier": 2, "value": Color(0.25, 0.70, 0.40), "accent": Color(0.60, 0.90, 0.65) },
-	"orange":  { "tier": 2, "value": Color(0.95, 0.55, 0.15), "accent": Color(1.00, 0.75, 0.45) },
+	"orange":      { "tier": 2, "value": Color(0.95, 0.55, 0.10), "accent": Color(1.00, 0.75, 0.40) },
+	"green":       { "tier": 2, "value": Color(0.20, 0.65, 0.35), "accent": Color(0.55, 0.90, 0.60) },
+	"purple":      { "tier": 2, "value": Color(0.50, 0.20, 0.70), "accent": Color(0.75, 0.55, 0.90) },
 
-	# ---- Tier 3 : Tertiary ----
-	"indigo":  { "tier": 3, "value": Color(0.29, 0.20, 0.55), "accent": Color(0.55, 0.45, 0.85) },
-	"amber":   { "tier": 3, "value": Color(0.80, 0.60, 0.10), "accent": Color(1.00, 0.85, 0.40) },
-	"crimson": { "tier": 3, "value": Color(0.65, 0.10, 0.20), "accent": Color(0.90, 0.40, 0.45) },
+	# ---- Tier 3 : Tertiary (primary + neighboring secondary) ----
+	"vermilion":   { "tier": 3, "value": Color(0.90, 0.35, 0.15), "accent": Color(1.00, 0.60, 0.40) },
+	"amber":       { "tier": 3, "value": Color(0.92, 0.68, 0.15), "accent": Color(1.00, 0.85, 0.50) },
+	"chartreuse":  { "tier": 3, "value": Color(0.60, 0.80, 0.20), "accent": Color(0.80, 0.95, 0.50) },
+	"teal":        { "tier": 3, "value": Color(0.15, 0.60, 0.55), "accent": Color(0.50, 0.85, 0.80) },
+	"violet":      { "tier": 3, "value": Color(0.38, 0.25, 0.75), "accent": Color(0.65, 0.55, 0.95) },
+	"magenta":     { "tier": 3, "value": Color(0.80, 0.20, 0.55), "accent": Color(0.95, 0.55, 0.80) },
 
 	# ---- Tier 4 : Prism (the ultimate tile - endgame) ----
-	"prism":   { "tier": 4, "value": Color(0.95, 0.85, 0.35), "accent": Color(1.00, 1.00, 1.00) },
+	"prism":       { "tier": 4, "value": Color(1.00, 0.92, 0.50), "accent": Color(1.00, 1.00, 1.00) },
 }
 
 # Bonus points awarded per tier of the RESULT color of a merge.
@@ -130,15 +143,18 @@ var merge_rules = {
 	"blue+yellow": "green",
 	"red+yellow": "orange",
 
-	# Tier 2 + Tier 2 -> Tier 3
-	"green+purple": "indigo",
-	"green+orange": "amber",
-	"orange+purple": "crimson",
+	# Tier 1 + Tier 2 -> Tier 3 (primary + its neighboring secondary)
+	"orange+red": "vermilion",
+	"purple+red": "magenta",
+	"orange+yellow": "amber",
+	"green+yellow": "chartreuse",
+	"blue+green": "teal",
+	"blue+purple": "violet",
 
-	# Tier 3 + Tier 3 -> Tier 4 (all roads lead to prism)
-	"amber+indigo": "prism",
-	"amber+crimson": "prism",
-	"crimson+indigo": "prism",
+	# Tier 3 + Tier 3 -> Tier 4 (complementary pairs neutralize into Prism)
+	"teal+vermilion": "prism",
+	"amber+violet": "prism",
+	"chartreuse+magenta": "prism",
 }
 
 
